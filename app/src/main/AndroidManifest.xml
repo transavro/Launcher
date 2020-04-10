@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="tv.cloudwalker.launcher">
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:allowBackup="true"
+        android:name=".CloudwalkerApplication"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true">
+
+        <meta-data android:name="tv.cloudwalker.launcher.CloudwalkerAppGlideModule"
+            android:value="AppGlideModule"/>
+
+        <activity android:name=".DetailActivity"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/CustomDetailStyle"/>
+
+        <activity android:name=".MainActivity"
+            android:launchMode="singleInstance"
+            android:theme="@style/CustomBrowseStyle">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.HOME" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.COMMON_HOME" />
+            </intent-filter>
+        </activity>
+
+        <receiver android:name="fragment.MainFragment$RefreshBR"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="tv.cloudwalker.launcher.REFRESH"/>
+            </intent-filter>
+        </receiver>
+
+    </application>
+
+</manifest>

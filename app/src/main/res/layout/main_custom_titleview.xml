@@ -1,0 +1,91 @@
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+
+    <ImageView
+        android:id="@+id/search_orb"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_gravity="center_vertical|start"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="15dp"
+        android:background="@drawable/focuser"
+        android:nextFocusRight="@id/source_orb"
+        android:transitionGroup="true"
+        android:src="@drawable/ic_search"/>
+
+    <ImageView
+        android:id="@+id/source_orb"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_gravity="center_vertical"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="10dp"
+        android:layout_toEndOf="@id/search_orb"
+        android:focusable="true"
+        android:nextFocusLeft="@id/search_orb"
+        android:nextFocusRight="@id/settings_orb"
+        android:src="@drawable/title_source_input" />
+
+    <ImageView
+        android:id="@+id/settings_orb"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_gravity="center_vertical"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="10dp"
+        android:layout_toEndOf="@id/source_orb"
+        android:focusable="true"
+        android:nextFocusLeft="@id/source_orb"
+        android:nextFocusRight="@id/app_orb"
+        android:src="@drawable/title_settings" />
+
+
+    <ImageView
+        android:id="@+id/app_orb"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_gravity="center_vertical"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="10dp"
+        android:layout_toEndOf="@id/settings_orb"
+        android:focusable="true"
+        android:background="@drawable/focuser"
+        android:nextFocusLeft="@id/settings_orb"
+        android:src="@drawable/header_apps" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/brandIcon"
+            android:layout_width="200dp"
+            android:layout_height="60dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="20dp"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:padding="3dp" />
+    </RelativeLayout>
+</merge>
+
+
+
+    <!--    <ImageView-->
+    <!--        android:id="@+id/network_orb"-->
+    <!--        android:layout_height="60dp"-->
+    <!--        android:layout_width="60dp"-->
+    <!--        android:focusable="true"-->
+    <!--        android:layout_gravity="center_vertical"-->
+    <!--        android:layout_marginTop="8dp"-->
+    <!--        android:layout_marginStart="30dp"-->
+    <!--        android:src="@drawable/title_wifi"-->
+    <!--        android:layout_toEndOf="@id/search_orb"-->
+    <!--        android:nextFocusLeft="@id/search_orb"-->
+    <!--        android:nextFocusRight="@id/source_orb"-->
+    <!--        />-->
