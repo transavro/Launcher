@@ -2,11 +2,10 @@
 package fragment;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-
-import androidx.core.content.ContextCompat;
 
 import tv.cloudwalker.launcher.R;
 import utils.OttoBus;
@@ -46,8 +45,16 @@ public class ErrorFragment extends androidx.leanback.app.ErrorSupportFragment {
                     public void onClick(View arg0) {
                         if(errorButtonText.compareToIgnoreCase("refresh") == 0){
                             OttoBus.getBus().post("refresh");
+                        }else if(errorButtonText.compareToIgnoreCase("tv mode") == 0){
+                            Intent intent = new Intent();
+                            intent.setAction("android.intent.action.MAIN");
+                            intent.addCategory("android.intent.category.TV_HOME");
+                            intent.putExtra("isLauncherGoToTv", true);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                        }else {
+                            getFragmentManager().beginTransaction().remove(ErrorFragment.this).commit();
                         }
-                        getFragmentManager().beginTransaction().remove(ErrorFragment.this).commit();
                     }
                 });
         context = null;

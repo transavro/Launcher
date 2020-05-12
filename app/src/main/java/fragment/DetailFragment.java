@@ -86,13 +86,11 @@ public class DetailFragment extends DetailsSupportFragment implements OnItemView
 
     @Override
     public void onResume() {
-//        ((CloudwalkerApplication)getActivity().getApplication()).onActivityPreResumed(getActivity());
         super.onResume();
     }
 
     @Override
     public void onPause() {
-//        ((CloudwalkerApplication)getActivity().getApplication()).onActivityPrePaused(getActivity());
         super.onPause();
     }
 
@@ -202,8 +200,11 @@ public class DetailFragment extends DetailsSupportFragment implements OnItemView
             contentTile.setPackageName("com.google.android.youtube.tv");
         }
         if (!isPackageInstalled(contentTile.getPackageName(), context.getPackageManager())) {
-            Toast.makeText(context, "App not installed " + contentTile.getPackageName(), Toast.LENGTH_SHORT).show();
-            return;
+            Toast.makeText(context, contentTile.getSource() + " app is not installed. Opening CloudTV Appstore...", Toast.LENGTH_SHORT).show();
+            Intent appStoreIntent = getActivity().getPackageManager().getLeanbackLaunchIntentForPackage("com.replete.cwappstore");
+            if (appStoreIntent == null) return;
+            appStoreIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(appStoreIntent);            return;
         }
         if (contentTile.getTarget().isEmpty()) {
             Intent intent = context.getPackageManager().getLaunchIntentForPackage(contentTile.getPackageName());

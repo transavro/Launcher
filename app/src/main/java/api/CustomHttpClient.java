@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 import android.webkit.URLUtil;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyStore;
@@ -82,8 +84,6 @@ public class CustomHttpClient {
                 }
             });
 
-            final SharedPreferences sharedPreferences = context.getSharedPreferences("tvInfo", Context.MODE_PRIVATE);
-
             builder.addInterceptor(new Interceptor() {
                 @Override
                 public Response intercept(Chain chain) throws IOException {
@@ -91,19 +91,12 @@ public class CustomHttpClient {
                     Request original = chain.request();
 
                     Request request = original.newBuilder()
-//                            .header("emac", sharedPreferences.getString("tvEmac", "N0:N0:N0:N0:N0:N0"))
-                            .header("emac", "70:2E:D9:55:44:33")
-//                            .header("mboard", sharedPreferences.getString("tvBoard", ""))
-                            .header("mboard", "BD_TP_MS358_PB802")
-//                            .header("panel", sharedPreferences.getString("tvPanel", ""))
-                            .header("panel", "SamsungLSC320ANO9")
-//                            .header("model", sharedPreferences.getString("tvModel", ""))
-                            .header("model", "VTX32")
+                            .header("emac", getEthMacAddress())
+                            .header("mboard", getSystemProperty("ro.cvte.boardname"))
+                            .header("panel", getSystemProperty("ro.cvte.panelname"))
+                            .header("model", getSystemProperty("ro.product.model"))
                             .header("cotaversion", getSystemProperty("ro.cloudwalker.cota.version"))
-//                            .header("fotaversion", getSystemProperty("ro.cvte.ota.version"))
-                            .header("fotaversion", "20190626_164023")
-//                            .header("lversion", BuildConfig.VERSION_NAME + "-" + getSystemProperty("ro.cloudwalker.brand"))
-                            .header("lversion", "1.5.0-55-gbfc3a69-com-generic")
+                            .header("fotaversion", getSystemProperty("ro.cvte.ota.version"))
                             .header("package", BuildConfig.APPLICATION_ID)
                             .header("brand", getSystemProperty("ro.cloudwalker.brand"))
                             .method(original.method(), original.body())
@@ -119,6 +112,29 @@ public class CustomHttpClient {
             e.printStackTrace();
             return null;
         }
+    }
+
+    private static String getEthMacAddress() {
+        try {
+            return loadFileAsString().toUpperCase().substring(0, 17);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+
+    private static String loadFileAsString() throws java.io.IOException {
+        StringBuilder fileData = new StringBuilder(1000);
+        BufferedReader reader = new BufferedReader(new FileReader("/sys/class/net/eth0/address"));
+        char[] buf = new char[1024];
+        int numRead;
+        while ((numRead = reader.read(buf)) != -1) {
+            String readData = String.valueOf(buf, 0, numRead);
+            fileData.append(readData);
+        }
+        reader.close();
+        return fileData.toString();
     }
 
     private static String getSystemProperty(String key) {
@@ -139,21 +155,18 @@ public class CustomHttpClient {
             builder.readTimeout(30, TimeUnit.SECONDS);
             builder.writeTimeout(30, TimeUnit.SECONDS);
 
-            final SharedPreferences sharedPreferences = context.getSharedPreferences("tvInfo", Context.MODE_PRIVATE);
-
             builder.addInterceptor(new Interceptor() {
                 @Override
                 public Response intercept(Chain chain) throws IOException {
                     Request original = chain.request();
 
                     Request request = original.newBuilder()
-                            .header("emac", sharedPreferences.getString("tvEmac", "N0:N0:N0:N0:N0:N0"))
-                            .header("mboard", sharedPreferences.getString("tvBoard", ""))
-                            .header("panel", sharedPreferences.getString("tvPanel", ""))
-                            .header("model", sharedPreferences.getString("tvModel", ""))
+                            .header("emac", getEthMacAddress())
+                            .header("mboard", getSystemProperty("ro.cvte.boardname"))
+                            .header("panel", getSystemProperty("ro.cvte.panelname"))
+                            .header("model", getSystemProperty("ro.product.model"))
                             .header("cotaversion", getSystemProperty("ro.cloudwalker.cota.version"))
                             .header("fotaversion", getSystemProperty("ro.cvte.ota.version"))
-                            .header("lversion", BuildConfig.VERSION_NAME + "-" + getSystemProperty("ro.cloudwalker.brand"))
                             .header("package", BuildConfig.APPLICATION_ID)
                             .header("brand", getSystemProperty("ro.cloudwalker.brand"))
                             .method(original.method(), original.body())

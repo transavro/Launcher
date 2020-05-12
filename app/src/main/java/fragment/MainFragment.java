@@ -37,7 +37,7 @@ import presenter.CardPresenter;
 import tv.cloudwalker.launcher.BuildConfig;
 import tv.cloudwalker.launcher.CloudwalkerApplication;
 import tv.cloudwalker.launcher.DetailActivity;
-import tv.cloudwalker.launcher.R;
+import tv.cloudwalker.launcher.MainActivity;
 import utils.NetworkUtils;
 import utils.OttoBus;
 
@@ -52,12 +52,6 @@ public class MainFragment extends BrowseSupportFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        if (((CloudwalkerApplication) getActivity().getApplication()).getAppResources() == null) {
-            loadErrorFragment("Cloudwalker Skin Not Found.", "Back");
-            return;
-        }
-
         BackgroundManager.getInstance(getActivity()).attach(getActivity().getWindow());
         setupUIElements();
         setupEventListeners();
@@ -87,7 +81,7 @@ public class MainFragment extends BrowseSupportFragment {
             @Override
             public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item, RowPresenter.ViewHolder rowViewHolder, Row row) {
                 if (item instanceof MovieTile) {
-                    ((CloudwalkerApplication)getActivity().getApplication()).setHeroMovieTile((MovieTile) item);
+                    ((CloudwalkerApplication) getActivity().getApplication()).setHeroMovieTile((MovieTile) item);
                     if (((MovieTile) item).isDetailPage()) {
 
                         //Analytics Stuff
@@ -156,7 +150,6 @@ public class MainFragment extends BrowseSupportFragment {
 
     @Override
     public void onResume() {
-//        ((CloudwalkerApplication)getActivity().getApplication()).onActivityPreResumed(getActivity());
         BackgroundManager.getInstance(getActivity()).setColor(((CloudwalkerApplication) getActivity().getApplication()).getColor("main_fragment_bg_color"));
         OttoBus.getBus().register(this);
         super.onResume();
@@ -165,7 +158,6 @@ public class MainFragment extends BrowseSupportFragment {
 
     @Override
     public void onPause() {
-//        ((CloudwalkerApplication)getActivity().getApplication()).onActivityPrePaused(getActivity());
         OttoBus.getBus().unregister(this);
         super.onPause();
     }
@@ -176,7 +168,11 @@ public class MainFragment extends BrowseSupportFragment {
             contentTile.setPackageName("com.google.android.youtube.tv");
         }
         if (!isPackageInstalled(contentTile.getPackageName(), context.getPackageManager())) {
-            Toast.makeText(context, "App not installed " + contentTile.getPackageName(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, contentTile.getSource() + " app is not installed. Opening CloudTV Appstore...", Toast.LENGTH_SHORT).show();
+            Intent appStoreIntent = getActivity().getPackageManager().getLeanbackLaunchIntentForPackage("com.replete.cwappstore");
+            if (appStoreIntent == null) return;
+            appStoreIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(appStoreIntent);
             return;
         }
         if (contentTile.getTarget().isEmpty()) {
@@ -221,7 +217,7 @@ public class MainFragment extends BrowseSupportFragment {
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(contentTile.getTarget().get(0)));
             intent.setPackage(contentTile.getPackageName());
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivityForResult(intent , 10);
+            startActivityForResult(intent, 10);
         }
     }
 
@@ -265,6 +261,7 @@ public class MainFragment extends BrowseSupportFragment {
     }
 
     private void loadData() {
+
         try {
             CardPresenter cardPresenter = new CardPresenter();
             ListRowPresenter listRowPresenter = new ListRowPresenter(FocusHighlight.ZOOM_FACTOR_NONE, false);
@@ -286,7 +283,7 @@ public class MainFragment extends BrowseSupportFragment {
             setAdapter(primeAdapter);
             return;
         } catch (Exception e) {
-            loadErrorFragment("Error while loading data ==> " + e.getLocalizedMessage(), "Back");
+            ((MainActivity) getActivity()).loadErrorFragment("Error while loading data ==> " + e.getLocalizedMessage(), "Back");
             return;
         }
 
@@ -335,13 +332,12 @@ public class MainFragment extends BrowseSupportFragment {
 //                    }
 //                });
 
-
     }
 
 
     private MovieResponse readJSONFromAsset() {
         try {
-            InputStream is = getActivity().getAssets().open("parind.json");
+            InputStream is = getActivity().getAssets().open("cats.json");
             int size = is.available();
             byte[] buffer = new byte[size];
             is.read(buffer);
@@ -357,19 +353,12 @@ public class MainFragment extends BrowseSupportFragment {
 
     private void loadRows() {
         if (NetworkUtils.getConnectivityStatus(getActivity()) == NetworkUtils.TYPE_NOT_CONNECTED) {
-            loadErrorFragment("Not Connected to Internet", "Refresh");
+            ((MainActivity) getActivity()).loadErrorFragment("Not Connected to Internet", "Refresh");
             return;
         }
         loadData();
     }
 
-    private void loadErrorFragment(String reason, String btnText) {
-        if (mErrorFragment == null) {
-            mErrorFragment = new ErrorFragment();
-            mErrorFragment.setErrorContent(reason, btnText, getActivity());
-        }
-        getFragmentManager().beginTransaction().add(R.id.main_browse_fragment, mErrorFragment).commit();
-    }
 
     private class RefreshBR extends BroadcastReceiver {
         @Override

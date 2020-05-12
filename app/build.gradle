@@ -18,7 +18,7 @@ android {
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
     defaultConfig {
-        applicationId "tv.cloudwalker.cwnxt.launcher.com"
+        applicationId "tv.cloudwalker.launcher"
         minSdkVersion 21
         buildConfigField "String", "SERVER_URL", '"https://tvapi.cloudwalker.tv/"'
         targetSdkVersion 29
@@ -37,7 +37,7 @@ android {
         debug {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            buildConfigField "String", "SERVER_URL", '"https://dev-tvapi.cloudwalker.tv/"'
+            buildConfigField "String", "SERVER_URL", '"https://tvapi.cloudwalker.tv/"'
             debuggable true
             applicationIdSuffix '.dev'
             versionNameSuffix '-dev'
