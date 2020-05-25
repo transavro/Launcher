@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "175390433349",
+    "firebase_url": "https://cloudwalker-launcher-45f8e.firebaseio.com",
+    "project_id": "cloudwalker-launcher-45f8e",
+    "storage_bucket": "cloudwalker-launcher-45f8e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:175390433349:android:9edce0a211c6627b44432c",
+        "android_client_info": {
+          "package_name": "tv.cloudwalker.launcher"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "175390433349-ccjnhiqe3hs0v756k4msi9jnsdiov10g.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "tv.cloudwalker.launcher",
+            "certificate_hash": "4b62726fb47b82b4367248bb12d508a7f278b000"
+          }
+        },
+        {
+          "client_id": "175390433349-hm4a7uifd97vcmlm9h1l0t231k6e116t.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC7QxgWhsAfL0GAC-bzQZHz5XcGmfl5yWs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "175390433349-hm4a7uifd97vcmlm9h1l0t231k6e116t.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

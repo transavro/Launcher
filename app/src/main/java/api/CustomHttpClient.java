@@ -29,6 +29,8 @@ import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 import tv.cloudwalker.launcher.BuildConfig;
 
+import static tv.cloudwalker.launcher.CloudwalkerApplication.getSystemProperty;
+
 /**
  * Created by cognoscis on 8/3/18.
  */
@@ -137,16 +139,7 @@ public class CustomHttpClient {
         return fileData.toString();
     }
 
-    private static String getSystemProperty(String key) {
-        String value = null;
-        try {
-            value = (String) Class.forName("android.os.SystemProperties")
-                    .getMethod("get", String.class).invoke(null, key);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return value;
-    }
+
 
     private static OkHttpClient getOkHttp(Context context) {
         try {

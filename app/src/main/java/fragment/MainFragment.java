@@ -19,6 +19,7 @@ import androidx.leanback.widget.HeaderItem;
 import androidx.leanback.widget.ListRow;
 import androidx.leanback.widget.ListRowPresenter;
 import androidx.leanback.widget.OnItemViewClickedListener;
+import androidx.leanback.widget.OnItemViewSelectedListener;
 import androidx.leanback.widget.Presenter;
 import androidx.leanback.widget.Row;
 import androidx.leanback.widget.RowPresenter;
@@ -29,12 +30,12 @@ import com.squareup.otto.Subscribe;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Objects;
 
 import model.MovieResponse;
 import model.MovieRow;
 import model.MovieTile;
 import presenter.CardPresenter;
-import tv.cloudwalker.launcher.BuildConfig;
 import tv.cloudwalker.launcher.CloudwalkerApplication;
 import tv.cloudwalker.launcher.DetailActivity;
 import tv.cloudwalker.launcher.MainActivity;
@@ -43,7 +44,6 @@ import utils.OttoBus;
 
 public class MainFragment extends BrowseSupportFragment {
 
-    private ErrorFragment mErrorFragment;
     private static final String TAG = "MainFragment";
     private BroadcastReceiver refreshBR = new RefreshBR();
     private IntentFilter mIntentFilter = new IntentFilter("tv.cloudwalker.launcher.REFRESH");
@@ -62,6 +62,9 @@ public class MainFragment extends BrowseSupportFragment {
         setBadgeDrawable(((CloudwalkerApplication) getActivity().getApplication()).getDrawable("logo"));
         setHeadersState(((CloudwalkerApplication) getActivity().getApplication()).getInteger("has_fastlane"));
         setHeadersTransitionOnBackEnabled(true);
+
+
+
         setBrandColor(((CloudwalkerApplication) getActivity().getApplication()).getColor("fastlane_color"));
     }
 
@@ -77,24 +80,23 @@ public class MainFragment extends BrowseSupportFragment {
             }
         });
 
+
+        setOnItemViewSelectedListener(new OnItemViewSelectedListener() {
+            @Override
+            public void onItemSelected(Presenter.ViewHolder itemViewHolder, Object item, RowPresenter.ViewHolder rowViewHolder, Row row) {
+                logAnalyticsEvent(row.getHeaderItem().getName(), item, "TILE_SELECTED");
+            }
+        });
+
+
         setOnItemViewClickedListener(new OnItemViewClickedListener() {
             @Override
             public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item, RowPresenter.ViewHolder rowViewHolder, Row row) {
                 if (item instanceof MovieTile) {
-                    ((CloudwalkerApplication) getActivity().getApplication()).setHeroMovieTile((MovieTile) item);
                     if (((MovieTile) item).isDetailPage()) {
 
-                        //Analytics Stuff
-                        Intent analyticsIntent = new Intent("tv.cloudwalker.launcher.TILE_CLICK");
-                        Bundle data = new Bundle();
-                        data.putString("packageName", BuildConfig.APPLICATION_ID);
-                        data.putString("tileId", ((MovieTile) item).getTid());
-                        data.putString("tileTile", ((MovieTile) item).getTitle());
-                        data.putString("tileSource", ((MovieTile) item).getSource());
-                        analyticsIntent.putExtra("tileClicked", data);
-                        itemViewHolder.view.getContext().sendBroadcast(analyticsIntent);
-                        analyticsIntent = null;
-                        data = null;
+                        //logi Analytics event
+                        logAnalyticsEvent( row.getHeaderItem().getName(), item, "TILE_CLICKED");
 
                         // Detail Page Stuff
                         Bundle bundle = new Bundle();
@@ -104,25 +106,58 @@ public class MainFragment extends BrowseSupportFragment {
                         intent.putExtra(MovieTile.class.getSimpleName(), bundle);
                         intent.putExtra("background", ((MovieTile) item).getBackground());
                         startActivityForResult(intent, 10);
+
                     } else {
-
-                        Intent analyticsIntent = new Intent("tv.cloudwalker.launcher.TILE_PLAYED");
-                        Bundle data = new Bundle();
-                        data.putString("packageName", BuildConfig.APPLICATION_ID);
-                        data.putString("tileId", ((MovieTile) item).getTid());
-                        data.putString("tileTile", ((MovieTile) item).getTitle());
-                        data.putString("tileSource", ((MovieTile) item).getSource());
-                        analyticsIntent.putExtra("tileClicked", data);
-                        itemViewHolder.view.getContext().sendBroadcast(analyticsIntent);
-                        analyticsIntent = null;
-                        data = null;
-
                         handleTileClick((MovieTile) item, itemViewHolder.view.getContext());
                     }
                 }
                 return;
             }
         });
+    }
+
+    private void logAnalyticsEvent(String rowName, Object item , String eventName) {
+        if(item instanceof MovieTile)
+        {
+            boolean found = false;
+            for(int rowIndex  = 0 ; rowIndex < getAdapter().size() ; rowIndex++ )
+            {
+                if(found) break;
+
+                ArrayObjectAdapter rowAdap = (ArrayObjectAdapter) ((ListRow) getAdapter().get(rowIndex)).getAdapter();
+                for(int tileIndex = 0; tileIndex < rowAdap.size() ; tileIndex++ )
+                {
+                    MovieTile movieTile = (MovieTile) rowAdap.get(tileIndex);
+                    if(movieTile.getTitle().equals(((MovieTile) item).getTitle()))
+                    {
+                        //FireBase Analytics Stuff
+                        Bundle fireBundle = new Bundle();
+                        fireBundle.putString("TILE_ID", ((MovieTile) item).getTid());
+                        fireBundle.putLong("ROW_INDEX", rowIndex);
+                        fireBundle.putLong("TILE_INDEX", tileIndex);
+                        fireBundle.putString("TILE_TITLE", ((MovieTile) item).getTitle());
+                        fireBundle.putString("TILE_SOURCE", ((MovieTile) item).getSource());
+                        fireBundle.putString("TILE_ROW_NAME", rowName);
+                        if (((MovieTile) item).getYear() != null && !((MovieTile) item).getYear().isEmpty())
+                            fireBundle.putString("TILE_YEAR", ((MovieTile) item).getYear());
+
+                        if (((MovieTile) item).getCast() != null && ((MovieTile) item).getCast().size() > 1)
+                            fireBundle.putString("TILE_CAST",android.text.TextUtils.join(",", ((MovieTile) item).getCast()));
+
+                        if (((MovieTile) item).getDirector() != null && ((MovieTile) item).getDirector().size() > 1)
+                            fireBundle.putString("TILE_DIRECTOR", android.text.TextUtils.join(",", ((MovieTile) item).getDirector()));
+
+                        if (((MovieTile) item).getGenre() != null && ((MovieTile) item).getGenre().size() > 1)
+                            fireBundle.putString("TILE_GENRE", android.text.TextUtils.join(",", ((MovieTile) item).getGenre()));
+
+                        ((CloudwalkerApplication) Objects.requireNonNull(getActivity()).getApplication()).getAnalytics().logEvent(eventName, fireBundle);
+                        fireBundle = null;
+                        found = true;
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     @Subscribe
@@ -337,7 +372,7 @@ public class MainFragment extends BrowseSupportFragment {
 
     private MovieResponse readJSONFromAsset() {
         try {
-            InputStream is = getActivity().getAssets().open("cats.json");
+            InputStream is = getActivity().getAssets().open("banner.json");
             int size = is.available();
             byte[] buffer = new byte[size];
             is.read(buffer);

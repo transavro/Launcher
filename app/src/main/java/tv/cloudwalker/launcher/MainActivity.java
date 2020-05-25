@@ -84,27 +84,6 @@ public class MainActivity extends FragmentActivity {
         return value;
     }
 
-    public String getEthMacAddress() {
-        try {
-            return loadFileAsString("/sys/class/net/eth0/address").toUpperCase().substring(0, 17);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public String loadFileAsString(String filePath) throws java.io.IOException {
-        StringBuffer fileData = new StringBuffer(1000);
-        BufferedReader reader = new BufferedReader(new FileReader(filePath));
-        char[] buf = new char[1024];
-        int numRead;
-        while ((numRead = reader.read(buf)) != -1) {
-            String readData = String.valueOf(buf, 0, numRead);
-            fileData.append(readData);
-        }
-        reader.close();
-        return fileData.toString();
-    }
 
 
     @Override

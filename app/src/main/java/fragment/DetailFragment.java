@@ -111,7 +111,6 @@ public class DetailFragment extends DetailsSupportFragment implements OnItemView
             public void onActionClicked(Action action) {
                 int actionId = (int) action.getId();
                 if (actionId == PLAY_VIDEO) {
-                    ((CloudwalkerApplication)getActivity().getApplication()).setHeroMovieTile(movieTile);
                     handleTileClick(movieTile, getContext());
                 }
             }
