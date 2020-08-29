@@ -92,17 +92,31 @@ public class CustomHttpClient {
 
                     Request original = chain.request();
 
+//                    Request request = original.newBuilder()
+//                            .header("emac", getEthMacAddress())
+//                            .header("mboard", getSystemProperty("ro.cvte.boardname"))
+//                            .header("panel", getSystemProperty("ro.cvte.panelname"))
+//                            .header("model", getSystemProperty("ro.product.model"))
+//                            .header("cotaversion", getSystemProperty("ro.cloudwalker.cota.version"))
+//                            .header("fotaversion", getSystemProperty("ro.cvte.ota.version"))
+//                            .header("package", BuildConfig.APPLICATION_ID)
+//                            .header("brand", getSystemProperty("ro.cloudwalker.brand"))
+//                            .method(original.method(), original.body())
+//                            .build();
+
                     Request request = original.newBuilder()
-                            .header("emac", getEthMacAddress())
-                            .header("mboard", getSystemProperty("ro.cvte.boardname"))
-                            .header("panel", getSystemProperty("ro.cvte.panelname"))
-                            .header("model", getSystemProperty("ro.product.model"))
-                            .header("cotaversion", getSystemProperty("ro.cloudwalker.cota.version"))
-                            .header("fotaversion", getSystemProperty("ro.cvte.ota.version"))
-                            .header("package", BuildConfig.APPLICATION_ID)
-                            .header("brand", getSystemProperty("ro.cloudwalker.brand"))
+                            .header("emac", "70:2E:D9:55:44:1A")
+                            .header("mboard","TP.MT5510I.PB805")
+                            .header("panel", "SamsungLSC320ANO9")
+                            .header("model", "CWT32SHX214")
+                            .header("cotaversion", "20190723_204423")
+                            .header("fotaversion", "20190723_204423")
+                            .header("lversion", "1.5.0-72-gedf1406-com-generic")
+                            .header("package", "tv.cloudwalker.launcher.generic")
+                            .header("brand", "generic")
                             .method(original.method(), original.body())
                             .build();
+
 
                     return chain.proceed(request);
                 }

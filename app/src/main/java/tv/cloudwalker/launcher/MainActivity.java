@@ -5,10 +5,6 @@ import android.os.Bundle;
 
 import androidx.fragment.app.FragmentActivity;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-
 import fragment.ErrorFragment;
 import fragment.MainFragment;
 
@@ -16,16 +12,21 @@ public class MainActivity extends FragmentActivity {
 
     private ErrorFragment mErrorFragment;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        if(checkIfCWSuitIsSetup()){
-            loadMainFragment();
-        }else {
-            loadErrorFragment("Cloudwalker Suit is incomplete.", "TV Mode");
-        }
+
+
+        loadMainFragment();
+
+
+//        if(checkIfCWSuitIsSetup()){
+//            loadMainFragment();
+//        }else {
+//            loadErrorFragment("Cloudwalker Suit is incomplete.", "TV Mode");
+//        }
+
     }
 
     private void loadMainFragment(){
@@ -49,7 +50,7 @@ public class MainActivity extends FragmentActivity {
         if (!reason) {
             return reason;
         }
-        reason = isPackageInstalled("com.replete.cwappstore", getPackageManager());
+        reason = isPackageInstalled("tv.cloudwalker.market", getPackageManager());
         if (!reason) {
             return reason;
         }

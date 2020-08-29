@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -28,14 +29,26 @@ import com.google.android.youtube.player.YouTubeIntents;
 import com.google.gson.Gson;
 import com.squareup.otto.Subscribe;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Objects;
 
+import api.ApiClient;
+import api.ApiInterface;
 import model.MovieResponse;
 import model.MovieRow;
 import model.MovieTile;
+import okhttp3.ResponseBody;
 import presenter.CardPresenter;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import tv.cloudwalker.launcher.CloudwalkerApplication;
 import tv.cloudwalker.launcher.DetailActivity;
 import tv.cloudwalker.launcher.MainActivity;
@@ -44,7 +57,6 @@ import utils.OttoBus;
 
 public class MainFragment extends BrowseSupportFragment {
 
-    private static final String TAG = "MainFragment";
     private BroadcastReceiver refreshBR = new RefreshBR();
     private IntentFilter mIntentFilter = new IntentFilter("tv.cloudwalker.launcher.REFRESH");
 
@@ -52,20 +64,17 @@ public class MainFragment extends BrowseSupportFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        BackgroundManager.getInstance(getActivity()).attach(getActivity().getWindow());
+        BackgroundManager.getInstance(Objects.requireNonNull(getActivity())).attach(Objects.requireNonNull(getActivity()).getWindow());
         setupUIElements();
         setupEventListeners();
         loadRows();
     }
 
     private void setupUIElements() {
-        setBadgeDrawable(((CloudwalkerApplication) getActivity().getApplication()).getDrawable("logo"));
-        setHeadersState(((CloudwalkerApplication) getActivity().getApplication()).getInteger("has_fastlane"));
+        setBadgeDrawable(((CloudwalkerApplication) Objects.requireNonNull(getActivity()).getApplication()).getDrawable("logo"));
+        setHeadersState(((CloudwalkerApplication) Objects.requireNonNull(getActivity()).getApplication()).getInteger("has_fastlane"));
         setHeadersTransitionOnBackEnabled(true);
-
-
-
-        setBrandColor(((CloudwalkerApplication) getActivity().getApplication()).getColor("fastlane_color"));
+        setBrandColor(((CloudwalkerApplication) Objects.requireNonNull(getActivity()).getApplication()).getColor("fastlane_color"));
     }
 
     private void setupEventListeners() {
@@ -101,7 +110,7 @@ public class MainFragment extends BrowseSupportFragment {
                         // Detail Page Stuff
                         Bundle bundle = new Bundle();
                         bundle.putParcelable(MovieTile.class.getSimpleName(), (MovieTile) item);
-                        Intent intent = new Intent(getActivity(), DetailActivity.class);
+                        Intent intent = new Intent(Objects.requireNonNull(getActivity()), DetailActivity.class);
                         intent.putExtra("tileID", ((MovieTile) item).getTid());
                         intent.putExtra(MovieTile.class.getSimpleName(), bundle);
                         intent.putExtra("background", ((MovieTile) item).getBackground());
@@ -111,7 +120,6 @@ public class MainFragment extends BrowseSupportFragment {
                         handleTileClick((MovieTile) item, itemViewHolder.view.getContext());
                     }
                 }
-                return;
             }
         });
     }
@@ -150,8 +158,7 @@ public class MainFragment extends BrowseSupportFragment {
                         if (((MovieTile) item).getGenre() != null && ((MovieTile) item).getGenre().size() > 1)
                             fireBundle.putString("TILE_GENRE", android.text.TextUtils.join(",", ((MovieTile) item).getGenre()));
 
-                        ((CloudwalkerApplication) Objects.requireNonNull(getActivity()).getApplication()).getAnalytics().logEvent(eventName, fireBundle);
-                        fireBundle = null;
+                        ((CloudwalkerApplication) Objects.requireNonNull(Objects.requireNonNull(getActivity())).getApplication()).getAnalytics().logEvent(eventName, fireBundle);
                         found = true;
                         break;
                     }
@@ -171,21 +178,21 @@ public class MainFragment extends BrowseSupportFragment {
     @Override
     public void onStart() {
         if (refreshBR != null && mIntentFilter != null)
-            getActivity().registerReceiver(refreshBR, mIntentFilter);
+            Objects.requireNonNull(getActivity()).registerReceiver(refreshBR, mIntentFilter);
         super.onStart();
     }
 
     @Override
     public void onStop() {
         if (refreshBR != null)
-            getActivity().unregisterReceiver(refreshBR);
+            Objects.requireNonNull(getActivity()).unregisterReceiver(refreshBR);
         super.onStop();
     }
 
 
     @Override
     public void onResume() {
-        BackgroundManager.getInstance(getActivity()).setColor(((CloudwalkerApplication) getActivity().getApplication()).getColor("main_fragment_bg_color"));
+        BackgroundManager.getInstance(Objects.requireNonNull(getActivity())).setColor(((CloudwalkerApplication) Objects.requireNonNull(getActivity()).getApplication()).getColor("main_fragment_bg_color"));
         OttoBus.getBus().register(this);
         super.onResume();
     }
@@ -203,11 +210,13 @@ public class MainFragment extends BrowseSupportFragment {
             contentTile.setPackageName("com.google.android.youtube.tv");
         }
         if (!isPackageInstalled(contentTile.getPackageName(), context.getPackageManager())) {
-            Toast.makeText(context, contentTile.getSource() + " app is not installed. Opening CloudTV Appstore...", Toast.LENGTH_SHORT).show();
-            Intent appStoreIntent = getActivity().getPackageManager().getLeanbackLaunchIntentForPackage("com.replete.cwappstore");
-            if (appStoreIntent == null) return;
+            Intent appStoreIntent = new Intent();
+            appStoreIntent.setData(Uri.parse("cwmarket://appstore?package="+contentTile.getPackageName()));
+            appStoreIntent.setPackage("tv.cloudwalker.market");
+            appStoreIntent.setClassName( "tv.cloudwalker.market" , "tv.cloudwalker.market.activity.AppDetailsActivity" );
             appStoreIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(appStoreIntent);
+            Toast.makeText(context, contentTile.getSource() + " app is not installed. Opening CloudTV Appstore...", Toast.LENGTH_SHORT).show();
             return;
         }
         if (contentTile.getTarget().isEmpty()) {
@@ -215,7 +224,8 @@ public class MainFragment extends BrowseSupportFragment {
             if (intent == null) {
                 intent = context.getPackageManager().getLeanbackLaunchIntentForPackage(contentTile.getPackageName());
             }
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            if(intent == null) return;
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivityForResult(intent, 10);
             return;
         }
@@ -240,6 +250,7 @@ public class MainFragment extends BrowseSupportFragment {
             } catch (ActivityNotFoundException e) {
                 e.printStackTrace();
                 Intent intent = context.getPackageManager().getLeanbackLaunchIntentForPackage(contentTile.getPackageName());
+                if(intent == null) return;
                 if (contentTile.getTarget().contains("https")) {
                     intent.setData(Uri.parse(contentTile.getTarget().get(0).replace("https://www.hotstar.com", "hotstar://content")));
                 } else {
@@ -283,7 +294,6 @@ public class MainFragment extends BrowseSupportFragment {
             Intent intent = YouTubeIntents.createSearchIntent(mActivity, target);
             startActivityForResult(intent, 10);
         }
-        return;
     }
 
     private boolean isPackageInstalled(String packagename, PackageManager packageManager) {
@@ -296,7 +306,41 @@ public class MainFragment extends BrowseSupportFragment {
     }
 
     private void loadData() {
+        ApiClient
+                .getClient(Objects.requireNonNull(getActivity()))
+                .create(ApiInterface.class)
+                .getHomeScreenData()
+                .enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        MovieResponse movieResponse;
+                        if (response.code() != 200) {
+                            //reading from cache
+                            movieResponse = readCatsFromCache();
+                        } else {
+                            //writing to cache
+                            movieResponse = writeCatsInCache(response.body());
+                        }
 
+                        //if not found in cache as well show error msg
+                        if (movieResponse == null && ((MainActivity)getActivity()) != null) {
+                            ((MainActivity)getActivity()).loadErrorFragment("Some thing when wrong ==> " + response.code(), "Back");
+                            return;
+                        }
+                        //load Movie Response
+                        loadMovieResponse(movieResponse);
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        if(((MainActivity)getActivity()) != null)
+                            ((MainActivity)getActivity()).loadErrorFragment("Server error ==> " + t.getLocalizedMessage(), "Back");
+                    }
+                });
+    }
+
+
+    private void loadMovieResponse(MovieResponse movieResponse){
         try {
             CardPresenter cardPresenter = new CardPresenter();
             ListRowPresenter listRowPresenter = new ListRowPresenter(FocusHighlight.ZOOM_FACTOR_NONE, false);
@@ -306,7 +350,7 @@ public class MainFragment extends BrowseSupportFragment {
             listRowPresenter.setRecycledPoolSize(cardPresenter, 20);
             listRowPresenter.setSelectEffectEnabled(false);
             ArrayObjectAdapter primeAdapter = new ArrayObjectAdapter(listRowPresenter);
-            for (MovieRow movieRow : readJSONFromAsset().getRows()) {
+            for (MovieRow movieRow : movieResponse.getRows()) {
                 ArrayObjectAdapter rowAdapter = new ArrayObjectAdapter(cardPresenter);
                 for (MovieTile movieTile : movieRow.getRowItems()) {
                     movieTile.setRowLayout(movieRow.getRowLayout());
@@ -316,84 +360,66 @@ public class MainFragment extends BrowseSupportFragment {
                 primeAdapter.add(new ListRow(header, rowAdapter));
             }
             setAdapter(primeAdapter);
-            return;
         } catch (Exception e) {
-            ((MainActivity) getActivity()).loadErrorFragment("Error while loading data ==> " + e.getLocalizedMessage(), "Back");
-            return;
+            if(((MainActivity)getActivity()) != null)
+                ((MainActivity)getActivity()).loadErrorFragment("Error while loading data ==> " + e.getLocalizedMessage(), "Back");
         }
-
-
-//        ApiClient
-//                .getClient(getActivity())
-//                .create(ApiInterface.class)
-//                .getHomeScreenData()
-//                .enqueue(new Callback<MovieResponse>() {
-//                    @Override
-//                    public void onResponse(Call<MovieResponse> call, Response<MovieResponse> response) {
-//                        if (response.code() != 200) {
-//                            loadErrorFragment("Server response code ==> " + response.code(), "Back");
-//                            return;
-//                        }
-//
-//                        try {
-//                            CardPresenter cardPresenter = new CardPresenter();
-//                            ListRowPresenter listRowPresenter = new ListRowPresenter(FocusHighlight.ZOOM_FACTOR_NONE, false);
-//                            listRowPresenter.enableChildRoundedCorners(true);
-//                            listRowPresenter.setKeepChildForeground(true);
-//                            listRowPresenter.setShadowEnabled(false);
-//                            listRowPresenter.setRecycledPoolSize(cardPresenter, 20);
-//                            listRowPresenter.setSelectEffectEnabled(false);
-//                            ArrayObjectAdapter primeAdapter = new ArrayObjectAdapter(listRowPresenter);
-//                            for (MovieRow movieRow : response.body().getRows()) {
-//                                ArrayObjectAdapter rowAdapter = new ArrayObjectAdapter(cardPresenter);
-//                                for (MovieTile movieTile : movieRow.getRowItems()) {
-//                                    movieTile.setRowLayout(movieRow.getRowLayout());
-//                                    rowAdapter.add(movieTile);
-//                                }
-//                                HeaderItem header = new HeaderItem(movieRow.getRowIndex(), movieRow.getRowHeader());
-//                                primeAdapter.add(new ListRow(header, rowAdapter));
-//                            }
-//                            setAdapter(primeAdapter);
-//                            return;
-//                        } catch (Exception e) {
-//                            loadErrorFragment("Error while loading data ==> " + e.getLocalizedMessage(), "Back");
-//                            return;
-//                        }
-//                    }
-//
-//                    @Override
-//                    public void onFailure(Call<MovieResponse> call, Throwable t) {
-//                        loadErrorFragment("Server error ==> " + t.getLocalizedMessage(), "Back");
-//                    }
-//                });
-
     }
 
 
-    private MovieResponse readJSONFromAsset() {
-        try {
-            InputStream is = getActivity().getAssets().open("banner.json");
-            int size = is.available();
-            byte[] buffer = new byte[size];
-            is.read(buffer);
-            is.close();
-            String json = new String(buffer, "UTF-8");
-            Gson gson = new Gson();
-            return gson.fromJson(json, MovieResponse.class);
-        } catch (IOException ex) {
-            ex.printStackTrace();
+    private MovieResponse writeCatsInCache(ResponseBody response){
+        if(((MainActivity)getActivity()) == null){
             return null;
         }
+        File catsFile = new File(getActivity().getFilesDir().getAbsolutePath() + "/cats.json");
+        //deleting old copy
+        if (catsFile.exists()) {
+            catsFile.delete();
+        }
+        try {
+            InputStream input = response.byteStream();
+            OutputStream output = new FileOutputStream(catsFile);
+            byte[] data = new byte[1024];
+            int count;
+            while ((count = input.read(data)) != -1) {
+                output.write(data, 0, count);
+            }
+            output.flush();
+            input.close();
+            output.close();
+            response.close();
+            //reading and making MovieResponse
+            BufferedReader br = new BufferedReader(new FileReader(catsFile));
+            return  new Gson().fromJson(br, MovieResponse.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return  null;
+        }
+    }
+
+    private MovieResponse readCatsFromCache(){
+        if(getActivity() == null)
+            return null;
+        File catsFile = new File(getActivity().getFilesDir().getAbsolutePath() + "/cats.json");
+        if(!catsFile.exists())
+            return null;
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(catsFile));
+            return new Gson().fromJson(br, MovieResponse.class);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
+
     }
 
     private void loadRows() {
-        if (NetworkUtils.getConnectivityStatus(getActivity()) == NetworkUtils.TYPE_NOT_CONNECTED) {
-            ((MainActivity) getActivity()).loadErrorFragment("Not Connected to Internet", "Refresh");
+        if (NetworkUtils.getConnectivityStatus(Objects.requireNonNull(getActivity())) == NetworkUtils.TYPE_NOT_CONNECTED) {
+            ((MainActivity) Objects.requireNonNull(getActivity())).loadErrorFragment("Not Connected to Internet", "Refresh");
             return;
         }
         loadData();
     }
-
 
     private class RefreshBR extends BroadcastReceiver {
         @Override
