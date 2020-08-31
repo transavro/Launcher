@@ -12,9 +12,9 @@ import model.MovieResponse;
 
 public class AppUtils {
 
-    private MovieResponse readJSONFromAsset(Context context) {
+    public MovieResponse readJSONFromAsset(Context context, String fileName) {
         try {
-            InputStream is = context.getAssets().open("latest.json");
+            InputStream is = context.getAssets().open(fileName); //shoudl include ".json" in it
             int size = is.available();
             byte[] buffer = new byte[size];
             is.read(buffer);

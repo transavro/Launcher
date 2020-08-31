@@ -55,7 +55,21 @@
         android:focusable="true"
         android:background="@drawable/focuser"
         android:nextFocusLeft="@id/settings_orb"
+        android:nextFocusRight="@id/kids_orb"
         android:src="@drawable/header_apps" />
+
+    <ImageView
+        android:id="@+id/kids_orb"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_gravity="center_vertical"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="10dp"
+        android:layout_toEndOf="@id/app_orb"
+        android:focusable="true"
+        android:background="@drawable/focuser"
+        android:nextFocusLeft="@id/app_orb"
+        android:src="@drawable/kids" />
 
     <RelativeLayout
         android:layout_width="match_parent"

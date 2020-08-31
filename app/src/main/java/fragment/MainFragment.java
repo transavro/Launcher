@@ -8,7 +8,6 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -46,6 +45,7 @@ import model.MovieRow;
 import model.MovieTile;
 import okhttp3.ResponseBody;
 import presenter.CardPresenter;
+import presenter.CwCardPresenter;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -71,7 +71,7 @@ public class MainFragment extends BrowseSupportFragment {
     }
 
     private void setupUIElements() {
-        setBadgeDrawable(((CloudwalkerApplication) Objects.requireNonNull(getActivity()).getApplication()).getDrawable("logo"));
+        setBadgeDrawable(((CloudwalkerApplication) Objects.requireNonNull(getActivity()).getApplication()).getDrawable("title_logo"));
         setHeadersState(((CloudwalkerApplication) Objects.requireNonNull(getActivity()).getApplication()).getInteger("has_fastlane"));
         setHeadersTransitionOnBackEnabled(true);
         setBrandColor(((CloudwalkerApplication) Objects.requireNonNull(getActivity()).getApplication()).getColor("fastlane_color"));
@@ -170,7 +170,9 @@ public class MainFragment extends BrowseSupportFragment {
     @Subscribe
     public void GetRefreshTrigger(String trigger) {
         if (trigger.equals("refresh")) {
-            loadData();
+            loadData(false);
+        } if (trigger.equals("kids")) {
+            loadData(true);
         }
     }
 
@@ -305,11 +307,21 @@ public class MainFragment extends BrowseSupportFragment {
         }
     }
 
-    private void loadData() {
+    private void loadData(boolean kidsafe) {
+
+//        //tmp
+//        AppUtils appUtils = new AppUtils();
+//        MovieResponse movieResponse = appUtils.readJSONFromAsset(getActivity(), "kids.json");
+//        //load Movie Response
+//        loadMovieResponse(movieResponse);
+//        return;
+
+
+        //api call
         ApiClient
                 .getClient(Objects.requireNonNull(getActivity()))
                 .create(ApiInterface.class)
-                .getHomeScreenData()
+                .getHomeScreenData(kidsafe)
                 .enqueue(new Callback<ResponseBody>() {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
@@ -337,12 +349,14 @@ public class MainFragment extends BrowseSupportFragment {
                             ((MainActivity)getActivity()).loadErrorFragment("Server error ==> " + t.getLocalizedMessage(), "Back");
                     }
                 });
+
     }
 
 
     private void loadMovieResponse(MovieResponse movieResponse){
         try {
-            CardPresenter cardPresenter = new CardPresenter();
+//            CardPresenter cardPresenter = new CardPresenter();
+            CwCardPresenter cardPresenter = new CwCardPresenter();
             ListRowPresenter listRowPresenter = new ListRowPresenter(FocusHighlight.ZOOM_FACTOR_NONE, false);
             listRowPresenter.enableChildRoundedCorners(true);
             listRowPresenter.setKeepChildForeground(true);
@@ -410,7 +424,6 @@ public class MainFragment extends BrowseSupportFragment {
             e.printStackTrace();
             return null;
         }
-
     }
 
     private void loadRows() {
@@ -418,7 +431,7 @@ public class MainFragment extends BrowseSupportFragment {
             ((MainActivity) Objects.requireNonNull(getActivity())).loadErrorFragment("Not Connected to Internet", "Refresh");
             return;
         }
-        loadData();
+        loadData(false);
     }
 
     private class RefreshBR extends BroadcastReceiver {

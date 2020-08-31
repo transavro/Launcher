@@ -105,15 +105,16 @@ public class CustomHttpClient {
 //                            .build();
 
                     Request request = original.newBuilder()
-                            .header("emac", "70:2E:D9:55:44:1A")
-                            .header("mboard","TP.MT5510I.PB805")
-                            .header("panel", "SamsungLSC320ANO9")
-                            .header("model", "CWT32SHX214")
-                            .header("cotaversion", "20190723_204423")
-                            .header("fotaversion", "20190723_204423")
-                            .header("lversion", "1.5.0-72-gedf1406-com-generic")
-                            .header("package", "tv.cloudwalker.launcher.generic")
-                            .header("brand", "generic")
+                            .header("emac", "C0:8A:CD:C4:38:2A")
+                            .header("mboard","T.HV553.81B")
+                            .header("panel", "K650WDC2-LP330-A2")
+                            .header("model", "CWTSSUA7")
+                            .header("cotaversion", "20191206_160921")
+                            .header("fotaversion", "20190830_014928")
+                            .header("lversion", "2.1.0-41-geddca91-ss-com-smartscreen")
+                            .header("package", "tv.cloudwalker.cwnxt.launcher.com")
+                            .header("brand", "smartscreen")
+                            .header("ui_version", "0")
                             .method(original.method(), original.body())
                             .build();
 
@@ -121,6 +122,14 @@ public class CustomHttpClient {
                     return chain.proceed(request);
                 }
             });
+
+            //adding logging if in DEBUG MODE
+//            if (BuildConfig.DEBUG)
+            {
+                HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+                logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+                builder.addInterceptor(logging);
+            }
 
             return builder.build();
 

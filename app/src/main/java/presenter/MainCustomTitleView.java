@@ -15,12 +15,14 @@ import android.widget.Toast;
 
 import androidx.leanback.widget.TitleViewAdapter;
 
+import tv.cloudwalker.launcher.CloudwalkerApplication;
 import tv.cloudwalker.launcher.R;
+import utils.OttoBus;
 
 public class MainCustomTitleView extends RelativeLayout implements TitleViewAdapter.Provider {
 
     public ImageView badge;
-    public ImageView sourceOrb, settingsOrb, mSearchOrbView;
+    public ImageView sourceOrb, settingsOrb, mSearchOrbView, kidsOrb, appOrb;
 
     private final TitleViewAdapter mTitleViewAdapter = new TitleViewAdapter() {
         @Override
@@ -28,10 +30,6 @@ public class MainCustomTitleView extends RelativeLayout implements TitleViewAdap
             return mSearchOrbView;
         }
 
-        @Override
-        public void setTitle(CharSequence titleText) {
-            MainCustomTitleView.this.setTitle(titleText);
-        }
 
         @Override
         public void setBadgeDrawable(Drawable drawable) {
@@ -65,11 +63,14 @@ public class MainCustomTitleView extends RelativeLayout implements TitleViewAdap
         mSearchOrbView = root.findViewById(R.id.search_orb);
         sourceOrb = root.findViewById(R.id.source_orb);
         settingsOrb = root.findViewById(R.id.settings_orb);
+        kidsOrb = root.findViewById(R.id.kids_orb);
+        appOrb = root.findViewById(R.id.app_orb);
+
+        OttoBus.getBus().register(this);
         badge = root.findViewById(R.id.brandIcon);
 
-        sourceOrb.setImageDrawable(getResources().getDrawable(R.drawable.title_source_input));
-        settingsOrb.setImageDrawable(getResources().getDrawable(R.drawable.title_settings));
-
+        //loading assets from skin
+        loadImageAssetsFromSkin((CloudwalkerApplication) context.getApplicationContext());
 
         sourceOrb.setOnClickListener(new OnClickListener() {
             @Override
@@ -96,21 +97,24 @@ public class MainCustomTitleView extends RelativeLayout implements TitleViewAdap
             @Override
             public void onClick(View view) {
                 Intent launchIntent = view.getContext().getPackageManager().getLaunchIntentForPackage("com.cvte.tv.androidsetting");
-                if (launchIntent != null) {
-                    view.getContext().startActivity(launchIntent);
-                } else {
+                if (launchIntent == null) {
                     launchIntent = view.getContext().getPackageManager().getLaunchIntentForPackage("com.cvte.settings");
-                    if (launchIntent != null) {
-                        view.getContext().startActivity(launchIntent);
-                    } else {
+                    if (launchIntent == null) {
                         launchIntent = new Intent(Settings.ACTION_SETTINGS);
-                        view.getContext().startActivity(launchIntent);
                     }
                 }
+                view.getContext().startActivity(launchIntent);
             }
         });
 
-        root.findViewById(R.id.app_orb).setOnClickListener(new OnClickListener() {
+        kidsOrb.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                OttoBus.getBus().post("kids");
+            }
+        });
+
+        appOrb.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 try {
@@ -145,9 +149,16 @@ public class MainCustomTitleView extends RelativeLayout implements TitleViewAdap
         });
     }
 
-
-    public void setTitle(CharSequence title) {
-
+    private void loadImageAssetsFromSkin(CloudwalkerApplication application){
+        try{
+            sourceOrb.setImageDrawable(application.getDrawable("title_source"));
+            settingsOrb.setImageDrawable(application.getDrawable("title_settings"));
+            kidsOrb.setImageDrawable(application.getDrawable("title_kids"));
+            appOrb.setImageDrawable(application.getDrawable("title_apps"));
+            mSearchOrbView.setImageDrawable(application.getDrawable("title_search"));
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     public void setBadgeDrawable(Drawable drawable) {
