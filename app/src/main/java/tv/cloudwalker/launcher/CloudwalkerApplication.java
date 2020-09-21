@@ -13,16 +13,22 @@ import android.os.Bundle;
 import android.widget.Toast;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.toptech.tvapi.manager.TvFactoryManager;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+
+import model.TvInfo;
+
+import static utils.AppUtils.getWifiMacAddress;
 
 public class CloudwalkerApplication extends Application {
 
     private FirebaseAnalytics mFirebaseAnalytics;
     private AnalyticsBr analyticsBr;
     private AppOprationBr appOprationBr;
+    private TvInfo tvInfo;
 
 
 
@@ -43,6 +49,44 @@ public class CloudwalkerApplication extends Application {
         }
         return mFirebaseAnalytics;
     }
+
+//    public TvInfo getTvInfo(){
+//        if(tvInfo == null){
+//            prepareTvInfo(true);
+//        }
+//        return tvInfo;
+//    }
+
+
+
+//    private void prepareTvInfo(boolean isCVTE){
+//        tvInfo = new TvInfo();
+//        tvInfo.setWmac("");
+//        tvInfo.setEmac("");
+//        tvInfo.setFota("");
+//        tvInfo.setCota("");
+//        tvInfo.setModel("");
+//        tvInfo.setPanel("");
+//        tvInfo.setBoard("");
+//
+//        tvInfo.setEmac(getEthMacAddress());
+//        tvInfo.setWmac(getWifiMacAddress(this));
+//        tvInfo.setModel(getSystemProperty("ro.product.model"));
+//        tvInfo.setCota(getSystemProperty("ro.cloudwalker.cota.version"));
+//
+//        if(isCVTE){
+//            tvInfo.setPanel(getSystemProperty("ro.cvte.panelname"));
+//            tvInfo.setBoard(getSystemProperty("ro.cvte.boardname"));
+//            tvInfo.setFota(getSystemProperty("ro.cvte.ota.version"));
+//        }else {
+//            tvInfo.setBoard(getSystemProperty("ro.tv.pcbname"));
+//            String panelType = TvFactoryManager.getInstance().getPanelType();
+//            if(panelType != null){
+//                String[] split = panelType.split("\\.");
+//                tvInfo.setPanel(split[0]);
+//            }
+//        }
+//    }
 
     private void setAnalyticsBr(){
         if(analyticsBr == null)
@@ -81,7 +125,7 @@ public class CloudwalkerApplication extends Application {
     }
 
     public String loadFileAsString(String filePath) throws java.io.IOException {
-        StringBuffer fileData = new StringBuffer(1000);
+        StringBuilder fileData = new StringBuilder(1000);
         BufferedReader reader = new BufferedReader(new FileReader(filePath));
         char[] buf = new char[1024];
         int numRead;
@@ -185,11 +229,10 @@ public class CloudwalkerApplication extends Application {
                 }
                 break;
             }
-
         }
     }
 
-    class AnalyticsBr extends BroadcastReceiver{
+    public class AnalyticsBr extends BroadcastReceiver{
 
         private final String profileAction = "tv.cloudwalker.profile.action.SET";
         private final String cdeOpenAction = "tv.cloudwalker.cde.action.OPEN";

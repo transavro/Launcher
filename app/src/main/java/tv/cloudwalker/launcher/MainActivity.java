@@ -8,16 +8,18 @@ import androidx.fragment.app.FragmentActivity;
 import fragment.ErrorFragment;
 import fragment.MainFragment;
 
+import static utils.AppUtils.isPackageInstalled;
+
 public class MainActivity extends FragmentActivity {
 
     private ErrorFragment mErrorFragment;
+    private MainFragment mainFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-
+        mainFragment = new MainFragment();
         loadMainFragment();
 
 
@@ -32,7 +34,7 @@ public class MainActivity extends FragmentActivity {
     private void loadMainFragment(){
         getSupportFragmentManager()
                 .beginTransaction()
-                .add(R.id.main_browse_fragment, new MainFragment(), MainFragment.class.getSimpleName())
+                .add(R.id.main_browse_fragment, mainFragment, MainFragment.class.getSimpleName())
                 .commit();
     }
 
@@ -65,25 +67,8 @@ public class MainActivity extends FragmentActivity {
         getSupportFragmentManager().beginTransaction().add(R.id.main_browse_fragment, mErrorFragment).commit();
     }
 
-    private boolean isPackageInstalled(String packagename, PackageManager packageManager) {
-        try {
-            packageManager.getPackageInfo(packagename, 0);
-            return true;
-        } catch (PackageManager.NameNotFoundException e) {
-            return false;
-        }
-    }
 
-    public String getSystemProperty(String key) {
-        String value = null;
-        try {
-            value = (String) Class.forName("android.os.SystemProperties")
-                    .getMethod("get", String.class).invoke(null, key);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return value;
-    }
+
 
 
 

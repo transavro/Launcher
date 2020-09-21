@@ -18,6 +18,8 @@ import tv.cloudwalker.launcher.R;
 public class CardPresenter extends Presenter {
     private static int sSelectedBackgroundColor;
     private static int sDefaultBackgroundColor;
+    private int lw, lh, pw,ph ,sw, sh;
+
 
     private static void updateCardBackgroundColor(ImageCardView view, boolean selected) {
         int color = selected ? sSelectedBackgroundColor : sDefaultBackgroundColor;
@@ -46,8 +48,21 @@ public class CardPresenter extends Presenter {
         cardView.setCardType(ImageCardView.CARD_REGION_VISIBLE_ACTIVATED);
         cardView.setFocusableInTouchMode(true);
         updateCardBackgroundColor(cardView, false);
+        loadDimens(parent.getContext());
         return new ViewHolder(cardView);
     }
+
+    private void loadDimens(Context context){
+        lw = dpToPx(context, ((CloudwalkerApplication) context.getApplicationContext()).getInteger("tileLandScapeWidth"));
+        lh = dpToPx(context, ((CloudwalkerApplication) context.getApplicationContext()).getInteger("tileLandScapeHeight"));
+
+        pw = dpToPx(context, ((CloudwalkerApplication) context.getApplicationContext()).getInteger("tilePotraitWidth"));
+        ph = dpToPx(context, ((CloudwalkerApplication) context.getApplicationContext()).getInteger("tilePotraitHeight"));
+
+        sw = dpToPx(context, ((CloudwalkerApplication) context.getApplicationContext()).getInteger("tileSquareWidth"));
+        sh = dpToPx(context, ((CloudwalkerApplication) context.getApplicationContext()).getInteger("tileSquareHeight"));
+    }
+
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, Object item) {
@@ -64,79 +79,64 @@ public class CardPresenter extends Presenter {
             switch (movie.getRowLayout()) {
 
                 case "portrait": {
-                    int width, height;
                     if (movie.getTileWidth() != null && !movie.getTileWidth().isEmpty() && movie.getTileHeight() != null && !movie.getTileHeight().isEmpty()) {
-                        width = dpToPx(context, Integer.parseInt(movie.getTileWidth()));
-                        height = dpToPx(context, Integer.parseInt(movie.getTileHeight()));
-                    } else {
-                        width = dpToPx(context, ((CloudwalkerApplication) context.getApplicationContext()).getInteger("tilePotraitWidth"));
-                        height = dpToPx(context, ((CloudwalkerApplication) context.getApplicationContext()).getInteger("tilePotraitHeight"));
+                        pw = dpToPx(context, Integer.parseInt(movie.getTileWidth()));
+                        ph = dpToPx(context, Integer.parseInt(movie.getTileHeight()));
                     }
                     Glide.with(context)
                             .load(movie.getPortrait())
                             .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-                            .override(width, height)
+                            .override(pw, ph)
                             .error(R.drawable.movie)
                             .skipMemoryCache(true)
                             .into(imageView);
 
-                    imageCardView.setMainImageDimensions(width, height);
+                    imageCardView.setMainImageDimensions(pw,ph);
                 }
                 break;
 
                 case "square": {
-                    int width, height;
                     if (movie.getTileWidth() != null && !movie.getTileWidth().isEmpty() && movie.getTileHeight() != null && !movie.getTileHeight().isEmpty()) {
-                        width = dpToPx(context, Integer.parseInt(movie.getTileWidth()));
-                        height = dpToPx(context, Integer.parseInt(movie.getTileHeight()));
-                    } else {
-                        width = dpToPx(context, ((CloudwalkerApplication) context.getApplicationContext()).getInteger("tileSquareWidth"));
-                        height = dpToPx(context, ((CloudwalkerApplication) context.getApplicationContext()).getInteger("tileSquareHeight"));
+                        sw = dpToPx(context, Integer.parseInt(movie.getTileWidth()));
+                        sh = dpToPx(context, Integer.parseInt(movie.getTileHeight()));
                     }
                     Glide.with(context)
                             .load(movie.getPortrait())
                             .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-                            .override(width, height)
+                            .override(sw, sh)
                             .error(R.drawable.movie)
                             .skipMemoryCache(true)
                             .into(imageView);
 
-                    imageCardView.setMainImageDimensions(width, height);
+                    imageCardView.setMainImageDimensions(sw, sh);
                 }
                 break;
 
                 case "landscape": {
-                    int width, height;
                     if (movie.getTileWidth() != null && !movie.getTileWidth().isEmpty() && movie.getTileHeight() != null && !movie.getTileHeight().isEmpty()) {
-                        width = dpToPx(context, Integer.parseInt(movie.getTileWidth()));
-                        height = dpToPx(context, Integer.parseInt(movie.getTileHeight()));
-                    } else {
-                        width = dpToPx(context, ((CloudwalkerApplication) context.getApplicationContext()).getInteger("tileLandScapeWidth"));
-                        height = dpToPx(context, ((CloudwalkerApplication) context.getApplicationContext()).getInteger("tileLandScapeHeight"));
+                        lw = dpToPx(context, Integer.parseInt(movie.getTileWidth()));
+                        lh = dpToPx(context, Integer.parseInt(movie.getTileHeight()));
                     }
                     Glide.with(context)
                             .load(movie.getPoster())
                             .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-                            .override(width, height)
+                            .override(lw, lh)
                             .error(R.drawable.movie)
                             .skipMemoryCache(true)
                             .into(imageView);
 
-                    imageCardView.setMainImageDimensions(width, height);
+                    imageCardView.setMainImageDimensions(lw, lh);
                 }
                 break;
             }
         } else {
-            int width, height;
-            width = dpToPx(context, ((CloudwalkerApplication) context.getApplicationContext()).getInteger("defaulttileWidth"));
-            height = dpToPx(context, ((CloudwalkerApplication) context.getApplicationContext()).getInteger("defaulttileHeight"));
             Glide.with(context)
                     .load(R.drawable.movie)
                     .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
                     .skipMemoryCache(true)
                     .into(imageView);
 
-            imageCardView.setMainImageDimensions(width, height);
+            imageCardView.setMainImageDimensions(lw, lh);
         }
     }
 

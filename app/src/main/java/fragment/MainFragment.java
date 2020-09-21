@@ -8,21 +8,9 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
-
-import androidx.leanback.app.BackgroundManager;
-import androidx.leanback.app.BrowseSupportFragment;
-import androidx.leanback.widget.ArrayObjectAdapter;
-import androidx.leanback.widget.FocusHighlight;
-import androidx.leanback.widget.HeaderItem;
-import androidx.leanback.widget.ListRow;
-import androidx.leanback.widget.ListRowPresenter;
-import androidx.leanback.widget.OnItemViewClickedListener;
-import androidx.leanback.widget.OnItemViewSelectedListener;
-import androidx.leanback.widget.Presenter;
-import androidx.leanback.widget.Row;
-import androidx.leanback.widget.RowPresenter;
 
 import com.google.android.youtube.player.YouTubeIntents;
 import com.google.gson.Gson;
@@ -38,6 +26,18 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Objects;
 
+import androidx.leanback.app.BackgroundManager;
+import androidx.leanback.app.BrowseSupportFragment;
+import androidx.leanback.widget.ArrayObjectAdapter;
+import androidx.leanback.widget.FocusHighlight;
+import androidx.leanback.widget.HeaderItem;
+import androidx.leanback.widget.ListRow;
+import androidx.leanback.widget.ListRowPresenter;
+import androidx.leanback.widget.OnItemViewClickedListener;
+import androidx.leanback.widget.OnItemViewSelectedListener;
+import androidx.leanback.widget.Presenter;
+import androidx.leanback.widget.Row;
+import androidx.leanback.widget.RowPresenter;
 import api.ApiClient;
 import api.ApiInterface;
 import model.MovieResponse;
@@ -54,11 +54,13 @@ import tv.cloudwalker.launcher.DetailActivity;
 import tv.cloudwalker.launcher.MainActivity;
 import utils.NetworkUtils;
 import utils.OttoBus;
+import utils.PlayOnTv;
 
 public class MainFragment extends BrowseSupportFragment {
 
     private BroadcastReceiver refreshBR = new RefreshBR();
     private IntentFilter mIntentFilter = new IntentFilter("tv.cloudwalker.launcher.REFRESH");
+    private PlayOnTv playOnTv;
 
 
     @Override
@@ -117,7 +119,8 @@ public class MainFragment extends BrowseSupportFragment {
                         startActivityForResult(intent, 10);
 
                     } else {
-                        handleTileClick((MovieTile) item, itemViewHolder.view.getContext());
+                        getPlayOnTv().trigger(((MovieTile) item).getPackageName(), ((MovieTile) item).getTarget().get(0));
+//                        handleTileClick((MovieTile) item, itemViewHolder.view.getContext());
                     }
                 }
             }
@@ -204,6 +207,14 @@ public class MainFragment extends BrowseSupportFragment {
     public void onPause() {
         OttoBus.getBus().unregister(this);
         super.onPause();
+    }
+
+
+    public PlayOnTv getPlayOnTv() {
+        if(playOnTv == null){
+            playOnTv = new PlayOnTv(getActivity());
+        }
+        return playOnTv;
     }
 
     private void handleTileClick(MovieTile contentTile, Context context) {
@@ -309,15 +320,15 @@ public class MainFragment extends BrowseSupportFragment {
 
     private void loadData(boolean kidsafe) {
 
-//        //tmp
+//       tmp
 //        AppUtils appUtils = new AppUtils();
-//        MovieResponse movieResponse = appUtils.readJSONFromAsset(getActivity(), "kids.json");
+//        MovieResponse movieResponse = appUtils.readJSONFromAsset(getActivity(), "data.json");
 //        //load Movie Response
 //        loadMovieResponse(movieResponse);
 //        return;
 
 
-        //api call
+//        api call
         ApiClient
                 .getClient(Objects.requireNonNull(getActivity()))
                 .create(ApiInterface.class)
@@ -335,7 +346,7 @@ public class MainFragment extends BrowseSupportFragment {
                         }
 
                         //if not found in cache as well show error msg
-                        if (movieResponse == null && ((MainActivity)getActivity()) != null) {
+                        if (movieResponse == null && (getActivity()) != null) {
                             ((MainActivity)getActivity()).loadErrorFragment("Some thing when wrong ==> " + response.code(), "Back");
                             return;
                         }
@@ -345,11 +356,10 @@ public class MainFragment extends BrowseSupportFragment {
 
                     @Override
                     public void onFailure(Call<ResponseBody> call, Throwable t) {
-                        if(((MainActivity)getActivity()) != null)
+                        if((getActivity()) != null)
                             ((MainActivity)getActivity()).loadErrorFragment("Server error ==> " + t.getLocalizedMessage(), "Back");
                     }
                 });
-
     }
 
 
@@ -375,20 +385,21 @@ public class MainFragment extends BrowseSupportFragment {
             }
             setAdapter(primeAdapter);
         } catch (Exception e) {
-            if(((MainActivity)getActivity()) != null)
+            if((getActivity()) != null)
                 ((MainActivity)getActivity()).loadErrorFragment("Error while loading data ==> " + e.getLocalizedMessage(), "Back");
         }
     }
 
 
     private MovieResponse writeCatsInCache(ResponseBody response){
-        if(((MainActivity)getActivity()) == null){
+        if((getActivity()) == null){
             return null;
         }
         File catsFile = new File(getActivity().getFilesDir().getAbsolutePath() + "/cats.json");
         //deleting old copy
         if (catsFile.exists()) {
-            catsFile.delete();
+            boolean result = catsFile.delete();
+            Log.i("DeleteResult", "writeCatsInCache: "+result);
         }
         try {
             InputStream input = response.byteStream();
@@ -434,7 +445,7 @@ public class MainFragment extends BrowseSupportFragment {
         loadData(false);
     }
 
-    private class RefreshBR extends BroadcastReceiver {
+    public class RefreshBR extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             GetRefreshTrigger("refresh");

@@ -1,12 +1,11 @@
 package api;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.webkit.URLUtil;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyStore;
@@ -22,25 +21,24 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
+import model.TvInfo;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 import tv.cloudwalker.launcher.BuildConfig;
+import tv.cloudwalker.launcher.CloudwalkerApplication;
 
 import static tv.cloudwalker.launcher.CloudwalkerApplication.getSystemProperty;
 
-/**
- * Created by cognoscis on 8/3/18.
- */
 
 public class CustomHttpClient {
 
     public static String[] userAgentList = {
             "ro.build.version.release",
             "ro.product.model",
-            "ro.cvte.ota.version",
+            "ro.build.date.utc",
             "ro.cloudwalker.cota.version"
     };
 
@@ -73,6 +71,7 @@ public class CustomHttpClient {
             builder.connectTimeout(30, TimeUnit.SECONDS);
             builder.readTimeout(30, TimeUnit.SECONDS);
             builder.writeTimeout(30, TimeUnit.SECONDS);
+            assert trustManagers != null;
             builder.sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustManagers[0]);
 
 
@@ -87,20 +86,24 @@ public class CustomHttpClient {
             });
 
             builder.addInterceptor(new Interceptor() {
+                @NotNull
                 @Override
-                public Response intercept(Chain chain) throws IOException {
+                public Response intercept(@NotNull Chain chain) throws IOException {
+                   Request original = chain.request();
 
-                    Request original = chain.request();
 
+//                    TvInfo tvInfo = ((CloudwalkerApplication)context.getApplicationContext()).getTvInfo();
 //                    Request request = original.newBuilder()
-//                            .header("emac", getEthMacAddress())
-//                            .header("mboard", getSystemProperty("ro.cvte.boardname"))
-//                            .header("panel", getSystemProperty("ro.cvte.panelname"))
-//                            .header("model", getSystemProperty("ro.product.model"))
-//                            .header("cotaversion", getSystemProperty("ro.cloudwalker.cota.version"))
-//                            .header("fotaversion", getSystemProperty("ro.cvte.ota.version"))
+//                            .header("User-Agent",  (tvInfo.getBrand() != null ? tvInfo.getBrand() + "-" + tvUserAgent : tvUserAgent))
+//                            .header("emac", tvInfo.getEmac())
+//                            .header("mboard", tvInfo.getBoard())
+//                            .header("panel", tvInfo.getPanel())
+//                            .header("model", tvInfo.getModel())
+//                            .header("cotaversion", tvInfo.getCota())
+//                            .header("fotaversion", tvInfo.getFota())
+//                            .header("lversion", BuildConfig.VERSION_NAME  + "-" + tvInfo.getBrand())
 //                            .header("package", BuildConfig.APPLICATION_ID)
-//                            .header("brand", getSystemProperty("ro.cloudwalker.brand"))
+//                            .header("brand", tvInfo.getBrand())
 //                            .method(original.method(), original.body())
 //                            .build();
 
@@ -139,54 +142,46 @@ public class CustomHttpClient {
         }
     }
 
-    private static String getEthMacAddress() {
-        try {
-            return loadFileAsString().toUpperCase().substring(0, 17);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return "";
-        }
-    }
-
-
-    private static String loadFileAsString() throws java.io.IOException {
-        StringBuilder fileData = new StringBuilder(1000);
-        BufferedReader reader = new BufferedReader(new FileReader("/sys/class/net/eth0/address"));
-        char[] buf = new char[1024];
-        int numRead;
-        while ((numRead = reader.read(buf)) != -1) {
-            String readData = String.valueOf(buf, 0, numRead);
-            fileData.append(readData);
-        }
-        reader.close();
-        return fileData.toString();
-    }
-
-
-
-    private static OkHttpClient getOkHttp(Context context) {
+    private static OkHttpClient getOkHttp(final Context context) {
         try {
             OkHttpClient.Builder builder = new OkHttpClient.Builder();
             builder.connectTimeout(30, TimeUnit.SECONDS);
             builder.readTimeout(30, TimeUnit.SECONDS);
             builder.writeTimeout(30, TimeUnit.SECONDS);
-
             builder.addInterceptor(new Interceptor() {
+                @NotNull
                 @Override
-                public Response intercept(Chain chain) throws IOException {
+                public Response intercept(@NotNull Chain chain) throws IOException {
                     Request original = chain.request();
+//                    TvInfo tvInfo = ((CloudwalkerApplication)context.getApplicationContext()).getTvInfo();
+//                    Request request = original.newBuilder()
+//                            .header("User-Agent",  (tvInfo.getBrand() != null ? tvInfo.getBrand() + "-" + tvUserAgent : tvUserAgent))
+//                            .header("emac", tvInfo.getEmac())
+//                            .header("mboard", tvInfo.getBoard())
+//                            .header("panel", tvInfo.getPanel())
+//                            .header("model", tvInfo.getModel())
+//                            .header("cotaversion", tvInfo.getCota())
+//                            .header("fotaversion", tvInfo.getFota())
+//                            .header("lversion", BuildConfig.VERSION_NAME  + "-" + tvInfo.getBrand())
+//                            .header("package", BuildConfig.APPLICATION_ID)
+//                            .header("brand", tvInfo.getBrand())
+//                            .method(original.method(), original.body())
+//                            .build();
 
                     Request request = original.newBuilder()
-                            .header("emac", getEthMacAddress())
-                            .header("mboard", getSystemProperty("ro.cvte.boardname"))
-                            .header("panel", getSystemProperty("ro.cvte.panelname"))
-                            .header("model", getSystemProperty("ro.product.model"))
-                            .header("cotaversion", getSystemProperty("ro.cloudwalker.cota.version"))
-                            .header("fotaversion", getSystemProperty("ro.cvte.ota.version"))
-                            .header("package", BuildConfig.APPLICATION_ID)
-                            .header("brand", getSystemProperty("ro.cloudwalker.brand"))
+                            .header("emac", "C0:8A:CD:C4:38:2A")
+                            .header("mboard","T.HV553.81B")
+                            .header("panel", "K650WDC2-LP330-A2")
+                            .header("model", "CWTSSUA7")
+                            .header("cotaversion", "20191206_160921")
+                            .header("fotaversion", "20190830_014928")
+                            .header("lversion", "2.1.0-41-geddca91-ss-com-smartscreen")
+                            .header("package", "tv.cloudwalker.cwnxt.launcher.com")
+                            .header("brand", "smartscreen")
+                            .header("ui_version", "0")
                             .method(original.method(), original.body())
                             .build();
+
 
                     return chain.proceed(request);
                 }

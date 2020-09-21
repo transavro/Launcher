@@ -1,16 +1,14 @@
 package presenter;
 
 import android.content.Context;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-
-import androidx.leanback.widget.Presenter;
+import android.widget.LinearLayout;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
+import androidx.leanback.widget.Presenter;
 import model.MovieTile;
 import tv.cloudwalker.launcher.CloudwalkerApplication;
 import tv.cloudwalker.launcher.R;
@@ -18,61 +16,63 @@ import tv.cloudwalker.launcher.R;
 
 public class CwCardPresenter extends Presenter {
 
+    private int lw, lh, pw,ph ,sw, sh;
+
+    public CwCardPresenter(){
+
+    }
+
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.card_layout, parent, false);
+        ImageView v = new ImageView(parent.getContext());
         v.setBackground(((CloudwalkerApplication)parent.getContext().getApplicationContext()).getDrawable("focus_on_select_bg"));
+        v.setPadding(4,4,4,4);
+        loadDimens(parent.getContext());
         return new ViewHolder(v);
+    }
+
+    private void loadDimens(Context context){
+        lw = dpToPx(context, ((CloudwalkerApplication) context.getApplicationContext()).getInteger("tileLandScapeWidth"));
+        lh = dpToPx(context, ((CloudwalkerApplication) context.getApplicationContext()).getInteger("tileLandScapeHeight"));
+
+        pw = dpToPx(context, ((CloudwalkerApplication) context.getApplicationContext()).getInteger("tilePotraitWidth"));
+        ph = dpToPx(context, ((CloudwalkerApplication) context.getApplicationContext()).getInteger("tilePotraitHeight"));
+
+        sw = dpToPx(context, ((CloudwalkerApplication) context.getApplicationContext()).getInteger("tileSquareWidth"));
+        sh = dpToPx(context, ((CloudwalkerApplication) context.getApplicationContext()).getInteger("tileSquareHeight"));
     }
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, Object item) {
-        final ImageView posterImageView;
-        posterImageView =  viewHolder.view.findViewById(R.id.posterImageView);
+        final ImageView posterImageView = (ImageView) viewHolder.view;
 
         if(item instanceof MovieTile) {
             final MovieTile movieTile = (MovieTile) item;
             if(movieTile.getTileWidth() != null && movieTile.getTileHeight() != null && movieTile.getPoster() != null && movieTile.getRowLayout() != null ){
-                if(movieTile.getRowLayout().compareToIgnoreCase("landscape")==0)
-                {
-                    Glide.with(viewHolder.view.getContext())
-                            .load(movieTile.getPoster())
-                            .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-                            .skipMemoryCache(true)
-                            .override(Integer.parseInt(movieTile.getTileWidth()),Integer.parseInt(movieTile.getTileHeight()))
-                            .error(R.drawable.movie)
-                            .into(posterImageView);
-
-                }else if(movieTile.getRowLayout().compareToIgnoreCase("square")==0 || movieTile.getRowLayout().compareToIgnoreCase("portrait") == 0)
-                {
-                    Glide.with(viewHolder.view.getContext())
-                            .load(movieTile.getPortrait())
-                            .skipMemoryCache(true)
-                            .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-                            .override(Integer.parseInt(movieTile.getTileWidth()),Integer.parseInt(movieTile.getTileHeight()))
-                            .error(R.drawable.movie)
-                            .into(posterImageView);
+                String imageUrl = "";
+                if(movieTile.getRowLayout().compareToIgnoreCase("landscape")==0){
+                    imageUrl = movieTile.getPoster();
+                }else if(movieTile.getRowLayout().compareToIgnoreCase("square")==0 || movieTile.getRowLayout().compareToIgnoreCase("portrait") == 0){
+                    imageUrl  = movieTile.getPortrait();
                 }
-
-                ViewGroup.LayoutParams layoutParams = viewHolder.view.getLayoutParams();
-                layoutParams.width =  Integer.parseInt(movieTile.getTileWidth());
-                layoutParams.height = Integer.parseInt(movieTile.getTileHeight()) ;
-                viewHolder.view.setLayoutParams(layoutParams);
-
+                loadFinal(viewHolder.view.getContext(),
+                        imageUrl,
+                        Integer.parseInt(movieTile.getTileWidth()),
+                        Integer.parseInt(movieTile.getTileHeight()),
+                        posterImageView);
             }else {
-                setLayoutOfTile(movieTile,viewHolder.view.getContext(),viewHolder.view, posterImageView);
+                setLayoutOfTile(movieTile,viewHolder.view.getContext(), posterImageView);
             }
         }
     }
 
     @Override
     public void onUnbindViewHolder(ViewHolder viewHolder) {
-        ImageView posterImageView;
-        posterImageView = (ImageView) viewHolder.view.findViewById(R.id.posterImageView);
+        ImageView posterImageView = (ImageView) viewHolder.view;
         posterImageView.setImageDrawable(null);
     }
 
-    private void setLayoutOfTile(MovieTile movie, Context context, View view, ImageView imageView)
+    private void setLayoutOfTile(MovieTile movie, Context context, ImageView imageView)
     {
         if(movie != null && movie.getRowLayout() != null && movie.getTitle() != null)
         {
@@ -80,25 +80,19 @@ public class CwCardPresenter extends Presenter {
             {
                 case"portrait" :
                 {
-                    int width = dpToPx(context , context.getResources().getInteger(R.integer.tilePotraitWidth));
-                    int height = dpToPx(context , context.getResources().getInteger(R.integer.tilePotraitHeight));
-                    loadFinal(context, movie.getPortrait(), width, height, imageView, view);
+                    loadFinal(context, movie.getPortrait(), pw, ph, imageView);
                 }
                 break;
 
                 case "square":
                 {
-                    int width = dpToPx(context , context.getResources().getInteger(R.integer.tileSquareWidth));
-                    int height = dpToPx(context , context.getResources().getInteger(R.integer.tileSquareHeight));
-                    loadFinal(context, movie.getPortrait(), width, height, imageView, view);
+                    loadFinal(context, movie.getPortrait(), sw, sh, imageView);
                 }
                 break;
 
                 case "landscape":
                 {
-                    int width = dpToPx(context , context.getResources().getInteger(R.integer.tileLandScapeWidth));
-                    int height = dpToPx(context , context.getResources().getInteger(R.integer.tileLandScapeHeight));
-                    loadFinal(context, movie.getPoster(), width, height, imageView, view);
+                    loadFinal(context, movie.getPoster(), lw, lh, imageView);
                 }
                 break;
             }
@@ -107,14 +101,13 @@ public class CwCardPresenter extends Presenter {
         {
             loadFinal(context,
                     "",
-                    dpToPx(context , context.getResources().getInteger(R.integer.defaulttileWidth)),
-                    dpToPx(context , context.getResources().getInteger(R.integer.deafulttileHeight)),
-                    imageView,
-                    view);
+                    lw,
+                    lh,
+                    imageView);
         }
     }
 
-    private void loadFinal(Context context, String url, int width, int height, ImageView targetImageView, View parentView){
+    private void loadFinal(Context context, String url, int width, int height, ImageView targetImageView){
         Glide.with(context)
                 .load(url)
                 .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
@@ -122,10 +115,9 @@ public class CwCardPresenter extends Presenter {
                 .error(R.drawable.movie)
                 .skipMemoryCache(true)
                 .into(targetImageView);
-        ViewGroup.LayoutParams layoutParams = parentView.getLayoutParams();
-        layoutParams.width = width  ;
-        layoutParams.height =  height;
-        parentView.setLayoutParams(layoutParams);
+
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(width, height);
+        targetImageView.setLayoutParams(layoutParams);
     }
 
     private int dpToPx(Context ctx , int dp) {
