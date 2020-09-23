@@ -1,19 +1,17 @@
 package fragment;
 
-import android.content.ActivityNotFoundException;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
-import android.net.Uri;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-import com.google.android.youtube.player.YouTubeIntents;
 import com.google.gson.Gson;
 import com.squareup.otto.Subscribe;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -44,6 +42,7 @@ import model.MovieRow;
 import model.MovieTile;
 import okhttp3.ResponseBody;
 import presenter.CwCardPresenter;
+import receiver.NetworkChangeReceiver;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -54,20 +53,18 @@ import utils.NetworkUtils;
 import utils.OttoBus;
 import utils.PlayOnTv;
 
-public class MainFragment extends BrowseSupportFragment {
+public class MainFragment extends BrowseSupportFragment implements NetworkChangeReceiver.NetworkConnectivityInterface {
 
-//    private BroadcastReceiver refreshBR = new RefreshBR();
-    private IntentFilter mIntentFilter = new IntentFilter("tv.cloudwalker.launcher.REFRESH");
     private PlayOnTv playOnTv;
+    private NetworkChangeReceiver ncr;
 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        BackgroundManager.getInstance(Objects.requireNonNull(getActivity())).attach(Objects.requireNonNull(getActivity()).getWindow());
         setupUIElements();
         setupEventListeners();
-        loadRows();
+        ncr = new NetworkChangeReceiver();
     }
 
     private void setupUIElements() {
@@ -118,7 +115,6 @@ public class MainFragment extends BrowseSupportFragment {
 
                     } else {
                         getPlayOnTv().trigger(((MovieTile) item).getPackageName(), ((MovieTile) item).getTarget().get(0));
-//                        handleTileClick((MovieTile) item, itemViewHolder.view.getContext());
                     }
                 }
             }
@@ -172,25 +168,30 @@ public class MainFragment extends BrowseSupportFragment {
     public void GetRefreshTrigger(String trigger) {
         if (trigger.equals("refresh")) {
             loadData(false);
-        } if (trigger.equals("kids")) {
+        }
+        if (trigger.equals("kids")) {
             loadData(true);
         }
     }
 
 
-//    @Override
-//    public void onStart() {
-//        if (refreshBR != null && mIntentFilter != null)
-//            Objects.requireNonNull(getActivity()).registerReceiver(refreshBR, mIntentFilter);
-//        super.onStart();
-//    }
-//
-//    @Override
-//    public void onStop() {
-//        if (refreshBR != null)
-//            Objects.requireNonNull(getActivity()).unregisterReceiver(refreshBR);
-//        super.onStop();
-//    }
+    @Override
+    public void onStart() {
+        if (ncr != null) {
+            ncr.addListener(this);
+            Objects.requireNonNull(getActivity()).registerReceiver(ncr, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+        }
+        super.onStart();
+    }
+
+    @Override
+    public void onStop() {
+        if (ncr != null) {
+            ncr.removeListener(this);
+            Objects.requireNonNull(getActivity()).unregisterReceiver(ncr);
+        }
+        super.onStop();
+    }
 
 
     @Override
@@ -233,7 +234,7 @@ public class MainFragment extends BrowseSupportFragment {
                 .getHomeScreenData(kidsafe)
                 .enqueue(new Callback<ResponseBody>() {
                     @Override
-                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    public void onResponse(@NotNull Call<ResponseBody> call, @NotNull Response<ResponseBody> response) {
                         MovieResponse movieResponse;
                         if (response.code() != 200) {
                             //reading from cache
@@ -253,9 +254,9 @@ public class MainFragment extends BrowseSupportFragment {
                     }
 
                     @Override
-                    public void onFailure(Call<ResponseBody> call, Throwable t) {
-                        if((getActivity()) != null)
-                            ((MainActivity)getActivity()).loadErrorFragment("Server error ==> " + t.getLocalizedMessage(), "Back");
+                    public void onFailure(@NotNull Call<ResponseBody> call, @NotNull Throwable t) {
+                        if ((getActivity()) != null)
+                            ((MainActivity) getActivity()).loadErrorFragment("Server error ==> " + t.getLocalizedMessage(), "Back");
                     }
                 });
     }
@@ -263,7 +264,6 @@ public class MainFragment extends BrowseSupportFragment {
 
     private void loadMovieResponse(MovieResponse movieResponse){
         try {
-//            CardPresenter cardPresenter = new CardPresenter();
             CwCardPresenter cardPresenter = new CwCardPresenter();
             ListRowPresenter listRowPresenter = new ListRowPresenter(FocusHighlight.ZOOM_FACTOR_NONE, false);
             listRowPresenter.enableChildRoundedCorners(true);
@@ -335,20 +335,15 @@ public class MainFragment extends BrowseSupportFragment {
         }
     }
 
-    private void loadRows() {
-        if (NetworkUtils.getConnectivityStatus(Objects.requireNonNull(getActivity())) == NetworkUtils.TYPE_NOT_CONNECTED) {
-            ((MainActivity) Objects.requireNonNull(getActivity())).loadErrorFragment("Not Connected to Internet", "Refresh");
-            return;
-        }
-        loadData(false);
+    @Override
+    public void networkConnected() {
+        GetRefreshTrigger("refresh");
     }
 
-//    public class RefreshBR extends BroadcastReceiver {
-//        @Override
-//        public void onReceive(Context context, Intent intent) {
-//            GetRefreshTrigger("refresh");
-//        }
-//    }
+    @Override
+    public void networkDisconnected() {
+
+    }
 }
 
 

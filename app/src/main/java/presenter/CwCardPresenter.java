@@ -18,8 +18,7 @@ public class CwCardPresenter extends Presenter {
 
     private int lw, lh, pw,ph ,sw, sh;
 
-    public CwCardPresenter(){
-
+    public CwCardPresenter() {
     }
 
     @Override

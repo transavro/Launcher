@@ -1,10 +1,9 @@
 package tv.cloudwalker.launcher;
 
-import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 import androidx.fragment.app.FragmentActivity;
-
 import fragment.ErrorFragment;
 import fragment.MainFragment;
 
@@ -31,7 +30,16 @@ public class MainActivity extends FragmentActivity {
 
     }
 
-    private void loadMainFragment(){
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Drawable bg = ((CloudwalkerApplication) getApplication()).getDrawable("bg_gradient");
+        if (bg != null)
+            findViewById(R.id.main_browse_fragment).setBackground(bg);
+    }
+
+    private void loadMainFragment() {
         getSupportFragmentManager()
                 .beginTransaction()
                 .add(R.id.main_browse_fragment, mainFragment, MainFragment.class.getSimpleName())
@@ -66,11 +74,6 @@ public class MainActivity extends FragmentActivity {
         }
         getSupportFragmentManager().beginTransaction().add(R.id.main_browse_fragment, mErrorFragment).commit();
     }
-
-
-
-
-
 
     @Override
     public void onBackPressed() {
