@@ -52,9 +52,8 @@ public class ErrorFragment extends androidx.leanback.app.ErrorSupportFragment {
                             intent.putExtra("isLauncherGoToTv", true);
                             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             startActivity(intent);
-                        }else {
-                            getFragmentManager().beginTransaction().remove(ErrorFragment.this).commit();
                         }
+                        getFragmentManager().beginTransaction().remove(ErrorFragment.this).commit();
                     }
                 });
         context = null;

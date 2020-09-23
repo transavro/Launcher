@@ -1,6 +1,7 @@
 package api;
 
 import android.content.Context;
+import android.util.Log;
 import android.webkit.URLUtil;
 
 import org.jetbrains.annotations.NotNull;
@@ -41,6 +42,7 @@ public class CustomHttpClient {
             "ro.build.date.utc",
             "ro.cloudwalker.cota.version"
     };
+    private static final String TAG = "CustomHttpClient";
 
     public static boolean isUrlHTTPS(String url) {
         return URLUtil.isHttpsUrl(url);
@@ -92,34 +94,35 @@ public class CustomHttpClient {
                    Request original = chain.request();
 
 
-//                    TvInfo tvInfo = ((CloudwalkerApplication)context.getApplicationContext()).getTvInfo();
-//                    Request request = original.newBuilder()
-//                            .header("User-Agent",  (tvInfo.getBrand() != null ? tvInfo.getBrand() + "-" + tvUserAgent : tvUserAgent))
-//                            .header("emac", tvInfo.getEmac())
-//                            .header("mboard", tvInfo.getBoard())
-//                            .header("panel", tvInfo.getPanel())
-//                            .header("model", tvInfo.getModel())
-//                            .header("cotaversion", tvInfo.getCota())
-//                            .header("fotaversion", tvInfo.getFota())
-//                            .header("lversion", BuildConfig.VERSION_NAME  + "-" + tvInfo.getBrand())
-//                            .header("package", BuildConfig.APPLICATION_ID)
-//                            .header("brand", tvInfo.getBrand())
-//                            .method(original.method(), original.body())
-//                            .build();
-
+                    TvInfo tvInfo = ((CloudwalkerApplication)context.getApplicationContext()).getTvInfo();
+                    Log.d(TAG, "intercept:******************* "+tvInfo);
                     Request request = original.newBuilder()
-                            .header("emac", "C0:8A:CD:C4:38:2A")
-                            .header("mboard","T.HV553.81B")
-                            .header("panel", "K650WDC2-LP330-A2")
-                            .header("model", "CWTSSUA7")
-                            .header("cotaversion", "20191206_160921")
-                            .header("fotaversion", "20190830_014928")
-                            .header("lversion", "2.1.0-41-geddca91-ss-com-smartscreen")
-                            .header("package", "tv.cloudwalker.cwnxt.launcher.com")
-                            .header("brand", "smartscreen")
-                            .header("ui_version", "0")
+                            .header("User-Agent",  (tvInfo.getBrand() != null ? tvInfo.getBrand() + "-" + tvUserAgent : tvUserAgent))
+                            .header("emac", tvInfo.getEmac())
+                            .header("mboard", tvInfo.getBoard())
+                            .header("panel", tvInfo.getPanel())
+                            .header("model", tvInfo.getModel())
+                            .header("cotaversion", tvInfo.getCota())
+                            .header("fotaversion", tvInfo.getFota())
+                            .header("lversion", BuildConfig.VERSION_NAME  + "-" + tvInfo.getBrand())
+                            .header("package", BuildConfig.APPLICATION_ID)
+                            .header("brand", tvInfo.getBrand())
                             .method(original.method(), original.body())
                             .build();
+
+//                    Request request = original.newBuilder()
+//                            .header("emac", "C0:8A:CD:C4:38:2A")
+//                            .header("mboard","T.HV553.81B")
+//                            .header("panel", "K650WDC2-LP330-A2")
+//                            .header("model", "CWTSSUA7")
+//                            .header("cotaversion", "20191206_160921")
+//                            .header("fotaversion", "20190830_014928")
+//                            .header("lversion", "2.1.0-41-geddca91-ss-com-smartscreen")
+//                            .header("package", "tv.cloudwalker.cwnxt.launcher.com")
+//                            .header("brand", "smartscreen")
+//                            .header("ui_version", "0")
+//                            .method(original.method(), original.body())
+//                            .build();
 
 
                     return chain.proceed(request);
@@ -128,11 +131,11 @@ public class CustomHttpClient {
 
             //adding logging if in DEBUG MODE
 //            if (BuildConfig.DEBUG)
-            {
-                HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-                logging.setLevel(HttpLoggingInterceptor.Level.BODY);
-                builder.addInterceptor(logging);
-            }
+//            {
+//                HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+//                logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+//                builder.addInterceptor(logging);
+//            }
 
             return builder.build();
 
@@ -153,34 +156,34 @@ public class CustomHttpClient {
                 @Override
                 public Response intercept(@NotNull Chain chain) throws IOException {
                     Request original = chain.request();
-//                    TvInfo tvInfo = ((CloudwalkerApplication)context.getApplicationContext()).getTvInfo();
-//                    Request request = original.newBuilder()
-//                            .header("User-Agent",  (tvInfo.getBrand() != null ? tvInfo.getBrand() + "-" + tvUserAgent : tvUserAgent))
-//                            .header("emac", tvInfo.getEmac())
-//                            .header("mboard", tvInfo.getBoard())
-//                            .header("panel", tvInfo.getPanel())
-//                            .header("model", tvInfo.getModel())
-//                            .header("cotaversion", tvInfo.getCota())
-//                            .header("fotaversion", tvInfo.getFota())
-//                            .header("lversion", BuildConfig.VERSION_NAME  + "-" + tvInfo.getBrand())
-//                            .header("package", BuildConfig.APPLICATION_ID)
-//                            .header("brand", tvInfo.getBrand())
-//                            .method(original.method(), original.body())
-//                            .build();
-
+                    TvInfo tvInfo = ((CloudwalkerApplication)context.getApplicationContext()).getTvInfo();
                     Request request = original.newBuilder()
-                            .header("emac", "C0:8A:CD:C4:38:2A")
-                            .header("mboard","T.HV553.81B")
-                            .header("panel", "K650WDC2-LP330-A2")
-                            .header("model", "CWTSSUA7")
-                            .header("cotaversion", "20191206_160921")
-                            .header("fotaversion", "20190830_014928")
-                            .header("lversion", "2.1.0-41-geddca91-ss-com-smartscreen")
-                            .header("package", "tv.cloudwalker.cwnxt.launcher.com")
-                            .header("brand", "smartscreen")
-                            .header("ui_version", "0")
+                            .header("User-Agent",  (tvInfo.getBrand() != null ? tvInfo.getBrand() + "-" + tvUserAgent : tvUserAgent))
+                            .header("emac", tvInfo.getEmac())
+                            .header("mboard", tvInfo.getBoard())
+                            .header("panel", tvInfo.getPanel())
+                            .header("model", tvInfo.getModel())
+                            .header("cotaversion", tvInfo.getCota())
+                            .header("fotaversion", tvInfo.getFota())
+                            .header("lversion", BuildConfig.VERSION_NAME  + "-" + tvInfo.getBrand())
+                            .header("package", BuildConfig.APPLICATION_ID)
+                            .header("brand", tvInfo.getBrand())
                             .method(original.method(), original.body())
                             .build();
+
+//                    Request request = original.newBuilder()
+//                            .header("emac", "C0:8A:CD:C4:38:2A")
+//                            .header("mboard","T.HV553.81B")
+//                            .header("panel", "K650WDC2-LP330-A2")
+//                            .header("model", "CWTSSUA7")
+//                            .header("cotaversion", "20191206_160921")
+//                            .header("fotaversion", "20190830_014928")
+//                            .header("lversion", "2.1.0-41-geddca91-ss-com-smartscreen")
+//                            .header("package", "tv.cloudwalker.cwnxt.launcher.com")
+//                            .header("brand", "smartscreen")
+//                            .header("ui_version", "0")
+//                            .method(original.method(), original.body())
+//                            .build();
 
 
                     return chain.proceed(request);

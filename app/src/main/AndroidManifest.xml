@@ -3,6 +3,8 @@
     package="tv.cloudwalker.launcher"
     android:sharedUserId="android.uid.system">
 
+
+
     <uses-feature
         android:name="android.software.leanback"
         android:required="false" />
@@ -45,38 +47,38 @@
             </intent-filter>
         </activity>
 
-        <receiver
-            android:name="fragment.MainFragment$RefreshBR"
-            android:enabled="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="tv.cloudwalker.launcher.REFRESH" />
-            </intent-filter>
-        </receiver>
+<!--        <receiver-->
+<!--            android:name="fragment.MainFragment$RefreshBR"-->
+<!--            android:enabled="true"-->
+<!--            android:exported="true">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="tv.cloudwalker.launcher.REFRESH" />-->
+<!--            </intent-filter>-->
+<!--        </receiver>-->
 
-        <receiver android:name=".CloudwalkerApplication$AnalyticsBr">
-            <intent-filter>
-                <action android:name="tv.cloudwalker.profile.action.SET" />
-                <action android:name="tv.cloudwalker.cde.action.OPEN" />
-                <action android:name="tv.cloudwalker.cde.action.SEARCH" />
-                <action android:name="tv.cloudwalker.cde.action.CLICKED" />
-                <action android:name="tv.cloudwalker.apps.action.APP_OPEN" />
-                <action android:name="tv.cloudwalker.apps.action.OPEN" />
-            </intent-filter>
-        </receiver>
+<!--        <receiver android:name=".CloudwalkerApplication$AnalyticsBr">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="tv.cloudwalker.profile.action.SET" />-->
+<!--                <action android:name="tv.cloudwalker.cde.action.OPEN" />-->
+<!--                <action android:name="tv.cloudwalker.cde.action.SEARCH" />-->
+<!--                <action android:name="tv.cloudwalker.cde.action.CLICKED" />-->
+<!--                <action android:name="tv.cloudwalker.apps.action.APP_OPEN" />-->
+<!--                <action android:name="tv.cloudwalker.apps.action.OPEN" />-->
+<!--            </intent-filter>-->
+<!--        </receiver>-->
 
-        <receiver android:name=".CloudwalkerApplication$AppOprationBr">
-            <intent-filter>
-                <action android:name="android.intent.action.PACKAGE_ADDED" />
-                <action android:name="android.intent.action.PACKAGE_INSTALL" />
-                <action android:name="android.intent.action.PACKAGE_REMOVED" />
-                <action android:name="android.intent.action.PACKAGE_REPLACED" />
-                <action android:name="android.intent.action.PACKAGE_CHANGED" />
-                <action android:name="android.intent.action.PACKAGE_UNINSTALL" />
-                <action android:name="android.intent.action.PACKAGE_FULLY_REMOVED" />
-                <data android:scheme="package" />
-            </intent-filter>
-        </receiver>
+<!--        <receiver android:name=".CloudwalkerApplication$AppOprationBr">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.PACKAGE_ADDED" />-->
+<!--                <action android:name="android.intent.action.PACKAGE_INSTALL" />-->
+<!--                <action android:name="android.intent.action.PACKAGE_REMOVED" />-->
+<!--                <action android:name="android.intent.action.PACKAGE_REPLACED" />-->
+<!--                <action android:name="android.intent.action.PACKAGE_CHANGED" />-->
+<!--                <action android:name="android.intent.action.PACKAGE_UNINSTALL" />-->
+<!--                <action android:name="android.intent.action.PACKAGE_FULLY_REMOVED" />-->
+<!--                <data android:scheme="package" />-->
+<!--            </intent-filter>-->
+<!--        </receiver>-->
 
     </application>
 

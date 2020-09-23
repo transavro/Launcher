@@ -26,7 +26,8 @@ public class CwCardPresenter extends Presenter {
     public ViewHolder onCreateViewHolder(ViewGroup parent) {
         ImageView v = new ImageView(parent.getContext());
         v.setBackground(((CloudwalkerApplication)parent.getContext().getApplicationContext()).getDrawable("focus_on_select_bg"));
-        v.setPadding(4,4,4,4);
+        v.setScaleType(ImageView.ScaleType.FIT_XY);
+        v.setPadding(5, 5, 5, 5);
         loadDimens(parent.getContext());
         return new ViewHolder(v);
     }

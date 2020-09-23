@@ -61,6 +61,7 @@ public class MainCustomTitleView extends RelativeLayout implements TitleViewAdap
         super(context, attrs, defStyle);
         View root = LayoutInflater.from(context).inflate(R.layout.main_custom_titleview, this);
         mSearchOrbView = root.findViewById(R.id.search_orb);
+
         sourceOrb = root.findViewById(R.id.source_orb);
         settingsOrb = root.findViewById(R.id.settings_orb);
         kidsOrb = root.findViewById(R.id.kids_orb);
@@ -125,37 +126,26 @@ public class MainCustomTitleView extends RelativeLayout implements TitleViewAdap
             }
         });
 
-
-        settingsOrb.setOnFocusChangeListener(new OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean b) {
-                if (b) {
-                    settingsOrb.setImageDrawable(getResources().getDrawable(R.drawable.title_settings_hl));
-                } else {
-                    settingsOrb.setImageDrawable(getResources().getDrawable(R.drawable.title_settings));
-                }
-            }
-        });
-
-        sourceOrb.setOnFocusChangeListener(new OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean b) {
-                if (b) {
-                    sourceOrb.setImageDrawable(getResources().getDrawable(R.drawable.title_source_input_hl));
-                } else {
-                    sourceOrb.setImageDrawable(getResources().getDrawable(R.drawable.title_source_input));
-                }
-            }
-        });
     }
 
     private void loadImageAssetsFromSkin(CloudwalkerApplication application){
         try{
+
             sourceOrb.setImageDrawable(application.getDrawable("title_source"));
+            sourceOrb.setBackground(application.getDrawable("orb_focuser"));
+
             settingsOrb.setImageDrawable(application.getDrawable("title_settings"));
+            settingsOrb.setBackground(application.getDrawable("orb_focuser"));
+
             kidsOrb.setImageDrawable(application.getDrawable("title_kids"));
+            kidsOrb.setBackground(application.getDrawable("orb_focuser"));
+
             appOrb.setImageDrawable(application.getDrawable("title_apps"));
+            appOrb.setBackground(application.getDrawable("orb_focuser"));
+
             mSearchOrbView.setImageDrawable(application.getDrawable("title_search"));
+            mSearchOrbView.setBackground(application.getDrawable("orb_focuser"));
+
         }catch (Exception e){
             e.printStackTrace();
         }

@@ -1,7 +1,6 @@
 package fragment;
 
 import android.content.ActivityNotFoundException;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -44,7 +43,6 @@ import model.MovieResponse;
 import model.MovieRow;
 import model.MovieTile;
 import okhttp3.ResponseBody;
-import presenter.CardPresenter;
 import presenter.CwCardPresenter;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -58,7 +56,7 @@ import utils.PlayOnTv;
 
 public class MainFragment extends BrowseSupportFragment {
 
-    private BroadcastReceiver refreshBR = new RefreshBR();
+//    private BroadcastReceiver refreshBR = new RefreshBR();
     private IntentFilter mIntentFilter = new IntentFilter("tv.cloudwalker.launcher.REFRESH");
     private PlayOnTv playOnTv;
 
@@ -180,19 +178,19 @@ public class MainFragment extends BrowseSupportFragment {
     }
 
 
-    @Override
-    public void onStart() {
-        if (refreshBR != null && mIntentFilter != null)
-            Objects.requireNonNull(getActivity()).registerReceiver(refreshBR, mIntentFilter);
-        super.onStart();
-    }
-
-    @Override
-    public void onStop() {
-        if (refreshBR != null)
-            Objects.requireNonNull(getActivity()).unregisterReceiver(refreshBR);
-        super.onStop();
-    }
+//    @Override
+//    public void onStart() {
+//        if (refreshBR != null && mIntentFilter != null)
+//            Objects.requireNonNull(getActivity()).registerReceiver(refreshBR, mIntentFilter);
+//        super.onStart();
+//    }
+//
+//    @Override
+//    public void onStop() {
+//        if (refreshBR != null)
+//            Objects.requireNonNull(getActivity()).unregisterReceiver(refreshBR);
+//        super.onStop();
+//    }
 
 
     @Override
@@ -217,106 +215,6 @@ public class MainFragment extends BrowseSupportFragment {
         return playOnTv;
     }
 
-    private void handleTileClick(MovieTile contentTile, Context context) {
-        //check if the package is there or not
-        if (contentTile.getPackageName().contains("youtube")) {
-            contentTile.setPackageName("com.google.android.youtube.tv");
-        }
-        if (!isPackageInstalled(contentTile.getPackageName(), context.getPackageManager())) {
-            Intent appStoreIntent = new Intent();
-            appStoreIntent.setData(Uri.parse("cwmarket://appstore?package="+contentTile.getPackageName()));
-            appStoreIntent.setPackage("tv.cloudwalker.market");
-            appStoreIntent.setClassName( "tv.cloudwalker.market" , "tv.cloudwalker.market.activity.AppDetailsActivity" );
-            appStoreIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(appStoreIntent);
-            Toast.makeText(context, contentTile.getSource() + " app is not installed. Opening CloudTV Appstore...", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (contentTile.getTarget().isEmpty()) {
-            Intent intent = context.getPackageManager().getLaunchIntentForPackage(contentTile.getPackageName());
-            if (intent == null) {
-                intent = context.getPackageManager().getLeanbackLaunchIntentForPackage(contentTile.getPackageName());
-            }
-            if(intent == null) return;
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivityForResult(intent, 10);
-            return;
-        }
-
-        //if package is installed
-        //check its an youtube
-        if (contentTile.getPackageName().contains("youtube")) {
-            if (contentTile.getTarget().get(0).startsWith("PL")) {
-                startYoutube("OPEN_PLAYLIST", context, contentTile.getTarget().get(0));
-            } else if (contentTile.getTarget().get(0).startsWith("UC")) {
-                startYoutube("OPEN_CHANNEL", context, contentTile.getTarget().get(0));
-            } else {
-                startYoutube("PLAY_VIDEO", context, contentTile.getTarget().get(0));
-            }
-
-        } else if (contentTile.getPackageName().contains("hotstar")) {
-            // if hotstar
-            try {
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(contentTile.getTarget().get(0)));
-                intent.setPackage(contentTile.getPackageName());
-                startActivityForResult(intent, 10);
-            } catch (ActivityNotFoundException e) {
-                e.printStackTrace();
-                Intent intent = context.getPackageManager().getLeanbackLaunchIntentForPackage(contentTile.getPackageName());
-                if(intent == null) return;
-                if (contentTile.getTarget().contains("https")) {
-                    intent.setData(Uri.parse(contentTile.getTarget().get(0).replace("https://www.hotstar.com", "hotstar://content")));
-                } else {
-                    intent.setData(Uri.parse(contentTile.getTarget().get(0).replace("http://www.hotstar.com", "hotstar://content")));
-                }
-                startActivityForResult(intent, 0);
-            }
-        } else {
-            // if other app
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(contentTile.getTarget().get(0)));
-            intent.setPackage(contentTile.getPackageName());
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivityForResult(intent, 10);
-        }
-    }
-
-    private void startYoutube(String type, Context mActivity, String target) {
-        if (type.compareToIgnoreCase("PLAY_VIDEO") == 0 || type.compareToIgnoreCase("CWYT_VIDEO") == 0) {
-            Intent intent = YouTubeIntents.createPlayVideoIntentWithOptions(mActivity, target, true, true);
-            intent.setPackage("com.google.android.youtube.tv");
-            startActivityForResult(intent, 10);
-        } else if (type.compareToIgnoreCase("OPEN_PLAYLIST") == 0) {
-            Intent intent = YouTubeIntents.createOpenPlaylistIntent(mActivity, target);
-            intent.setPackage("com.google.android.youtube.tv");
-            intent.putExtra("finish_on_ended", true);
-            startActivityForResult(intent, 10);
-        } else if (type.compareToIgnoreCase("PLAY_PLAYLIST") == 0 || type.compareToIgnoreCase("CWYT_PLAYLIST") == 0) {
-            Intent intent = YouTubeIntents.createPlayPlaylistIntent(mActivity, target);
-            intent.setPackage("com.google.android.youtube.tv");
-            intent.putExtra("finish_on_ended", true);
-            startActivityForResult(intent, 10);
-        } else if (type.compareToIgnoreCase("OPEN_CHANNEL") == 0) {
-            Intent intent = YouTubeIntents.createChannelIntent(mActivity, target);
-            intent.setPackage("com.google.android.youtube.tv");
-            intent.putExtra("finish_on_ended", true);
-            startActivityForResult(intent, 10);
-        } else if (type.compareToIgnoreCase("OPEN_USER") == 0) {
-            Intent intent = YouTubeIntents.createUserIntent(mActivity, target);
-            startActivityForResult(intent, 10);
-        } else if (type.compareToIgnoreCase("OPEN_SEARCH") == 0) {
-            Intent intent = YouTubeIntents.createSearchIntent(mActivity, target);
-            startActivityForResult(intent, 10);
-        }
-    }
-
-    private boolean isPackageInstalled(String packagename, PackageManager packageManager) {
-        try {
-            packageManager.getPackageInfo(packagename, 0);
-            return true;
-        } catch (PackageManager.NameNotFoundException e) {
-            return false;
-        }
-    }
 
     private void loadData(boolean kidsafe) {
 
@@ -445,10 +343,126 @@ public class MainFragment extends BrowseSupportFragment {
         loadData(false);
     }
 
-    public class RefreshBR extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            GetRefreshTrigger("refresh");
-        }
-    }
+//    public class RefreshBR extends BroadcastReceiver {
+//        @Override
+//        public void onReceive(Context context, Intent intent) {
+//            GetRefreshTrigger("refresh");
+//        }
+//    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//    private void handleTileClick(MovieTile contentTile, Context context) {
+//        //check if the package is there or not
+//        if (contentTile.getPackageName().contains("youtube")) {
+//            contentTile.setPackageName("com.google.android.youtube.tv");
+//        }
+//        if (!isPackageInstalled(contentTile.getPackageName(), context.getPackageManager())) {
+//            Intent appStoreIntent = new Intent();
+//            appStoreIntent.setData(Uri.parse("cwmarket://appstore?package="+contentTile.getPackageName()));
+//            appStoreIntent.setPackage("tv.cloudwalker.market");
+//            appStoreIntent.setClassName( "tv.cloudwalker.market" , "tv.cloudwalker.market.activity.AppDetailsActivity" );
+//            appStoreIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//            startActivity(appStoreIntent);
+//            Toast.makeText(context, contentTile.getSource() + " app is not installed. Opening CloudTV Appstore...", Toast.LENGTH_SHORT).show();
+//            return;
+//        }
+//        if (contentTile.getTarget().isEmpty()) {
+//            Intent intent = context.getPackageManager().getLaunchIntentForPackage(contentTile.getPackageName());
+//            if (intent == null) {
+//                intent = context.getPackageManager().getLeanbackLaunchIntentForPackage(contentTile.getPackageName());
+//            }
+//            if(intent == null) return;
+//            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//            startActivityForResult(intent, 10);
+//            return;
+//        }
+//
+//        //if package is installed
+//        //check its an youtube
+//        if (contentTile.getPackageName().contains("youtube")) {
+//            if (contentTile.getTarget().get(0).startsWith("PL")) {
+//                startYoutube("OPEN_PLAYLIST", context, contentTile.getTarget().get(0));
+//            } else if (contentTile.getTarget().get(0).startsWith("UC")) {
+//                startYoutube("OPEN_CHANNEL", context, contentTile.getTarget().get(0));
+//            } else {
+//                startYoutube("PLAY_VIDEO", context, contentTile.getTarget().get(0));
+//            }
+//
+//        } else if (contentTile.getPackageName().contains("hotstar")) {
+//            // if hotstar
+//            try {
+//                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(contentTile.getTarget().get(0)));
+//                intent.setPackage(contentTile.getPackageName());
+//                startActivityForResult(intent, 10);
+//            } catch (ActivityNotFoundException e) {
+//                e.printStackTrace();
+//                Intent intent = context.getPackageManager().getLeanbackLaunchIntentForPackage(contentTile.getPackageName());
+//                if(intent == null) return;
+//                if (contentTile.getTarget().contains("https")) {
+//                    intent.setData(Uri.parse(contentTile.getTarget().get(0).replace("https://www.hotstar.com", "hotstar://content")));
+//                } else {
+//                    intent.setData(Uri.parse(contentTile.getTarget().get(0).replace("http://www.hotstar.com", "hotstar://content")));
+//                }
+//                startActivityForResult(intent, 0);
+//            }
+//        } else {
+//            // if other app
+//            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(contentTile.getTarget().get(0)));
+//            intent.setPackage(contentTile.getPackageName());
+//            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//            startActivityForResult(intent, 10);
+//        }
+//    }
+//
+//    private void startYoutube(String type, Context mActivity, String target) {
+//        if (type.compareToIgnoreCase("PLAY_VIDEO") == 0 || type.compareToIgnoreCase("CWYT_VIDEO") == 0) {
+//            Intent intent = YouTubeIntents.createPlayVideoIntentWithOptions(mActivity, target, true, true);
+//            intent.setPackage("com.google.android.youtube.tv");
+//            startActivityForResult(intent, 10);
+//        } else if (type.compareToIgnoreCase("OPEN_PLAYLIST") == 0) {
+//            Intent intent = YouTubeIntents.createOpenPlaylistIntent(mActivity, target);
+//            intent.setPackage("com.google.android.youtube.tv");
+//            intent.putExtra("finish_on_ended", true);
+//            startActivityForResult(intent, 10);
+//        } else if (type.compareToIgnoreCase("PLAY_PLAYLIST") == 0 || type.compareToIgnoreCase("CWYT_PLAYLIST") == 0) {
+//            Intent intent = YouTubeIntents.createPlayPlaylistIntent(mActivity, target);
+//            intent.setPackage("com.google.android.youtube.tv");
+//            intent.putExtra("finish_on_ended", true);
+//            startActivityForResult(intent, 10);
+//        } else if (type.compareToIgnoreCase("OPEN_CHANNEL") == 0) {
+//            Intent intent = YouTubeIntents.createChannelIntent(mActivity, target);
+//            intent.setPackage("com.google.android.youtube.tv");
+//            intent.putExtra("finish_on_ended", true);
+//            startActivityForResult(intent, 10);
+//        } else if (type.compareToIgnoreCase("OPEN_USER") == 0) {
+//            Intent intent = YouTubeIntents.createUserIntent(mActivity, target);
+//            startActivityForResult(intent, 10);
+//        } else if (type.compareToIgnoreCase("OPEN_SEARCH") == 0) {
+//            Intent intent = YouTubeIntents.createSearchIntent(mActivity, target);
+//            startActivityForResult(intent, 10);
+//        }
+//    }
+
+
+
+//    private boolean isPackageInstalled(String packagename, PackageManager packageManager) {
+//        try {
+//            packageManager.getPackageInfo(packagename, 0);
+//            return true;
+//        } catch (PackageManager.NameNotFoundException e) {
+//            return false;
+//        }
+//    }

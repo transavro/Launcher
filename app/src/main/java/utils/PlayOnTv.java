@@ -28,7 +28,22 @@ import static utils.AppUtils.isPackageInstalled;
 public class PlayOnTv {
     Context context;
     private static final String TAG = "PlayOnTv";
-    private String[] cwPartner = {"com.zee5.aosp", "in.startv.hotstar", "com.sonyliv"};
+    private String[] cwPartner = {
+            "com.zee5.aosp",
+            "in.startv.hotstartvonly",
+            "com.sonyliv",
+            "com.cloudwalker.shemarootv" ,
+            "com.jio.media.stb.ondemand",
+            "com.eros.now",
+            "com.hungama.movies.tv",
+            "com.balaji.alt.partner",
+            "com.yupptv.cloudwalker",
+            "com.epic.docubay.fire",
+            "com.epicchannel.epicon.cloudwalkerTv",
+            "tv.gemplex.firetv",
+            "com.watcho",
+            "com.flickstree.tv",
+            "com.suntv.sunnxt"};
 
 
     public PlayOnTv(Context context){
@@ -57,7 +72,7 @@ public class PlayOnTv {
 
     private String[] manupilateCW(String packageName, String deeplink) {
         Log.d(TAG,"CONTENT PLAY START ===>>>  "+ packageName + "      "+ deeplink);
-        if (deeplink == null) {
+        if (deeplink == null || deeplink.equals("null")) {
             deeplink = "";
         }
 
@@ -101,20 +116,27 @@ public class PlayOnTv {
         }
 
         //playing...
-        Log.d(TAG,"CONTENT PLAY END ===>>>  "+ packageName + "      "+ deeplink);
+        Log.d(TAG,"CONTENT PLAY END ===>>>  "+ packageName + "   "+ deeplink);
         return new String[]{packageName, deeplink};
     }
 
     private String play(String packageName, String deeplink){
-        //making intent
         Intent playIntent = new Intent();
-        playIntent.setPackage(packageName);
-        playIntent.setData(Uri.parse(deeplink));
-        playIntent.setAction(Intent.ACTION_VIEW);
-        if(!packageName.contains("youtube"))
-            playIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        if(deeplink.isEmpty()){
+            playIntent = context.getPackageManager().getLeanbackLaunchIntentForPackage(packageName);
+            if(playIntent == null){
+                playIntent = context.getPackageManager().getLaunchIntentForPackage(packageName);
+            }
+        }else{
+            //making intent
+            playIntent.setPackage(packageName);
+            playIntent.setData(Uri.parse(deeplink));
+            playIntent.setAction(Intent.ACTION_VIEW);
+        }
 
         try{
+            if(!packageName.contains("youtube"))
+                playIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(playIntent);
             return "Playing...";
         }catch (Exception e){
@@ -125,6 +147,7 @@ public class PlayOnTv {
 
 
     private void goToAppStore(String packageName){
+        Log.d(TAG, "goToAppStore: "+packageName);
         Intent intent = new Intent();
         if (Arrays.asList(cwPartner).contains(packageName) && isPackageInstalled("tv.cloudwalker.market", context.getPackageManager())){
             //go to cloudwalker appstore
@@ -157,7 +180,7 @@ public class PlayOnTv {
             }
         }
         try{
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
         }catch (Exception e){
             Log.e(TAG, "goToAppStore:Error while triggering AppStore ", e);

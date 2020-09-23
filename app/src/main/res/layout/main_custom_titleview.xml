@@ -12,64 +12,66 @@
         android:layout_gravity="center_vertical|start"
         android:layout_marginStart="20dp"
         android:layout_marginTop="15dp"
-        android:background="@drawable/focuser"
+
         android:nextFocusRight="@id/source_orb"
-        android:transitionGroup="true"
-        android:src="@drawable/ic_search"/>
+        android:scaleType="fitXY"
+        android:transitionGroup="true" />
 
     <ImageView
         android:id="@+id/source_orb"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_gravity="center_vertical"
         android:layout_marginStart="20dp"
         android:layout_marginTop="10dp"
         android:layout_toEndOf="@id/search_orb"
+
         android:focusable="true"
         android:nextFocusLeft="@id/search_orb"
         android:nextFocusRight="@id/settings_orb"
-        android:src="@drawable/title_source_input" />
+        android:scaleType="fitXY" />
 
     <ImageView
         android:id="@+id/settings_orb"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_gravity="center_vertical"
         android:layout_marginStart="20dp"
         android:layout_marginTop="10dp"
         android:layout_toEndOf="@id/source_orb"
+
         android:focusable="true"
         android:nextFocusLeft="@id/source_orb"
         android:nextFocusRight="@id/app_orb"
-        android:src="@drawable/title_settings" />
+        android:scaleType="fitXY" />
 
 
     <ImageView
         android:id="@+id/app_orb"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_gravity="center_vertical"
         android:layout_marginStart="20dp"
         android:layout_marginTop="10dp"
         android:layout_toEndOf="@id/settings_orb"
+
         android:focusable="true"
-        android:background="@drawable/focuser"
         android:nextFocusLeft="@id/settings_orb"
         android:nextFocusRight="@id/kids_orb"
-        android:src="@drawable/header_apps" />
+        android:scaleType="fitXY" />
 
     <ImageView
         android:id="@+id/kids_orb"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_gravity="center_vertical"
         android:layout_marginStart="20dp"
         android:layout_marginTop="10dp"
         android:layout_toEndOf="@id/app_orb"
+
         android:focusable="true"
-        android:background="@drawable/focuser"
         android:nextFocusLeft="@id/app_orb"
-        android:src="@drawable/kids" />
+        android:scaleType="fitXY" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -87,7 +89,6 @@
             android:padding="3dp" />
     </RelativeLayout>
 </merge>
-
 
 
     <!--    <ImageView-->
