@@ -1,23 +1,27 @@
 package presenter;
 
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.provider.Settings;
 import android.util.AttributeSet;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import androidx.leanback.widget.TitleViewAdapter;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
+import androidx.leanback.widget.TitleViewAdapter;
 import tv.cloudwalker.launcher.CloudwalkerApplication;
 import tv.cloudwalker.launcher.R;
-import utils.OttoBus;
+
+import static utils.AppUtils.goToSource;
 
 public class MainCustomTitleView extends RelativeLayout implements TitleViewAdapter.Provider {
 
@@ -67,7 +71,10 @@ public class MainCustomTitleView extends RelativeLayout implements TitleViewAdap
         kidsOrb = root.findViewById(R.id.kids_orb);
         appOrb = root.findViewById(R.id.app_orb);
 
-        OttoBus.getBus().register(this);
+        if(!EventBus.getDefault().isRegistered(this)){
+            EventBus.getDefault().register(this);
+        }
+
         badge = root.findViewById(R.id.brandIcon);
 
         //loading assets from skin
@@ -80,16 +87,7 @@ public class MainCustomTitleView extends RelativeLayout implements TitleViewAdap
                 if (startIntent != null) {
                     view.getContext().startActivity(startIntent);
                 } else {
-                    Intent intent = new Intent();
-                    intent.setAction("android.intent.action.MAIN");
-                    intent.addCategory("android.intent.category.TV_HOME");
-                    intent.putExtra("isLauncherGoToTv", true);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    try {
-                        view.getContext().startActivity(intent);
-                    } catch (ActivityNotFoundException e) {
-                        Toast.makeText(view.getContext(), "Source App not installed", Toast.LENGTH_SHORT).show();
-                    }
+                    goToSource(view.getContext());
                 }
             }
         });
@@ -111,7 +109,7 @@ public class MainCustomTitleView extends RelativeLayout implements TitleViewAdap
         kidsOrb.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                OttoBus.getBus().post("kids");
+                EventBus.getDefault().post("kids");
             }
         });
 
@@ -127,6 +125,13 @@ public class MainCustomTitleView extends RelativeLayout implements TitleViewAdap
         });
 
     }
+
+
+    // present of subscribe annotation is mandatory for GreenBot lib, if u r registering n unregistering.
+//    https://stackoverflow.com/questions/35874055/eventbus-subscriber-class-and-its-super-classes-have-no-public-methods-with-th/52758471
+    @Subscribe(threadMode =  ThreadMode.MAIN)
+    public void onMessageEvent(KeyEvent event){}
+
 
     private void loadImageAssetsFromSkin(CloudwalkerApplication application){
         try{

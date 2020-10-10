@@ -30,6 +30,7 @@ import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 import tv.cloudwalker.launcher.BuildConfig;
 import tv.cloudwalker.launcher.CloudwalkerApplication;
+import utils.KeyHelper;
 
 import static tv.cloudwalker.launcher.CloudwalkerApplication.getSystemProperty;
 
@@ -94,14 +95,25 @@ public class CustomHttpClient {
                    Request original = chain.request();
 
 
-                    TvInfo tvInfo = ((CloudwalkerApplication)context.getApplicationContext()).getTvInfo();
+                    TvInfo tvInfo = null;
+                    try {
+                        tvInfo = ((CloudwalkerApplication)context.getApplicationContext()).getTvInfo();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    KeyHelper keyHelper = new KeyHelper();
+                    String MD5 = keyHelper.get(context, "MD5", BuildConfig.APPLICATION_ID);
+
                     Log.d(TAG, "intercept:******************* "+tvInfo);
                     Request request = original.newBuilder()
                             .header("User-Agent",  (tvInfo.getBrand() != null ? tvInfo.getBrand() + "-" + tvUserAgent : tvUserAgent))
                             .header("emac", tvInfo.getEmac())
+                            .header("wmac", tvInfo.getWmac())
                             .header("mboard", tvInfo.getBoard())
                             .header("panel", tvInfo.getPanel())
                             .header("model", tvInfo.getModel())
+                            .header("keyMD5", MD5)
                             .header("cotaversion", tvInfo.getCota())
                             .header("fotaversion", tvInfo.getFota())
                             .header("lversion", BuildConfig.VERSION_NAME  + "-" + tvInfo.getBrand())
@@ -156,13 +168,23 @@ public class CustomHttpClient {
                 @Override
                 public Response intercept(@NotNull Chain chain) throws IOException {
                     Request original = chain.request();
-                    TvInfo tvInfo = ((CloudwalkerApplication)context.getApplicationContext()).getTvInfo();
+                    TvInfo tvInfo = null;
+                    try {
+                        tvInfo = ((CloudwalkerApplication)context.getApplicationContext()).getTvInfo();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    KeyHelper keyHelper = new KeyHelper();
+                    String MD5 = keyHelper.get(context, "MD5", BuildConfig.APPLICATION_ID);
+
                     Request request = original.newBuilder()
                             .header("User-Agent",  (tvInfo.getBrand() != null ? tvInfo.getBrand() + "-" + tvUserAgent : tvUserAgent))
                             .header("emac", tvInfo.getEmac())
                             .header("mboard", tvInfo.getBoard())
                             .header("panel", tvInfo.getPanel())
                             .header("model", tvInfo.getModel())
+                            .header("keyMD5", MD5)
                             .header("cotaversion", tvInfo.getCota())
                             .header("fotaversion", tvInfo.getFota())
                             .header("lversion", BuildConfig.VERSION_NAME  + "-" + tvInfo.getBrand())

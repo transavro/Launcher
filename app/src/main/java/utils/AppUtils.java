@@ -1,10 +1,13 @@
 package utils;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 
@@ -36,6 +39,21 @@ public class AppUtils {
             return null;
         }
     }
+
+
+    public static void goToSource(Context context){
+        Intent intent = new Intent();
+        intent.setAction("android.intent.action.MAIN");
+        intent.addCategory("android.intent.category.TV_HOME");
+        intent.putExtra("isLauncherGoToTv", true);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        try {
+            context.startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(context, "Source App not installed", Toast.LENGTH_SHORT).show();
+        }
+    }
+
 
 
     public static boolean isPackageInstalled(String packagename, PackageManager packageManager) {
@@ -91,13 +109,17 @@ public class AppUtils {
             WifiManager wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
             WifiInfo wifiInfo;
             if (wifiManager != null) {
+                boolean wifiState = wifiManager.isWifiEnabled();
+                if(!wifiState){
+                    wifiManager.setWifiEnabled(true);
+                }
                 wifiInfo = wifiManager.getConnectionInfo();
                 if (wifiInfo.getMacAddress() != null) {
                     macAddress = wifiInfo.getMacAddress().toUpperCase();
                 }else{
                     macAddress = "02:00:00:00:00:00";
                 }
-
+                wifiManager.setWifiEnabled(wifiState);
             }
         }
         return macAddress;

@@ -2,6 +2,7 @@ package tv.cloudwalker.launcher;
 
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -18,6 +19,7 @@ public class DetailActivity extends FragmentActivity {
 
     private Drawable detailDrawable;
     private String backgroundUrl;
+    private static final String TAG = "DetailActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,8 +46,15 @@ public class DetailActivity extends FragmentActivity {
 
     @Override
     public void onTrimMemory(int level) {
-        Glide.get(this).trimMemory(level);
+        try {
+            Glide.get(this).onTrimMemory(level);
+        }catch (Exception e){
+            Log.e(TAG, "onTrimMemory: ",e);
+        }
+        super.onTrimMemory(level);
     }
+
+  
 
     private void loadBackground(String backgroundUrl) {
         Glide.with(this)

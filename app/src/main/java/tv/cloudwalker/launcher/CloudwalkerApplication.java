@@ -1,9 +1,13 @@
 package tv.cloudwalker.launcher;
 
+import android.app.ActivityManager;
 import android.app.Application;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.toptech.tvapi.manager.TvFactoryManager;
@@ -11,6 +15,7 @@ import com.toptech.tvapi.manager.TvFactoryManager;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashMap;
 
 import model.TvInfo;
 
@@ -22,16 +27,68 @@ public class CloudwalkerApplication extends Application {
 //    private AnalyticsBr analyticsBr;
 //    private AppOprationBr appOprationBr;
     private TvInfo tvInfo;
+    private HashMap<String,String> keycodeMap = new HashMap<>();
+    private ActivityManager am = null;
+    private static final String TAG = "CloudwalkerApplication";
 
 
 
     @Override
     public void onCreate() {
+        Log.d(TAG, "onCreate: ");
         super.onCreate();
+        try {
+            init();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void init() throws Exception {
+        getKeycodeMap();
         getTvInfo();
         getAnalytics();
 //        setAnalyticsBr();
 //        setAppOprationBr();
+    }
+
+
+
+
+
+    public HashMap<String, String> getKeycodeMap() {
+        if(keycodeMap.size() == 0){
+            getKeyCodesFromProperties();
+        }
+        return keycodeMap;
+    }
+
+    public boolean checkIfTheClassIsInFront(String className){
+        if(am == null){
+            am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        }
+        ComponentName cn = am.getRunningTasks(1).get(0).topActivity;
+        return cn.getClassName().contains(className);
+    }
+
+
+    private void getKeyCodesFromProperties(){
+//        ro.cloudtv.config.path
+//        String filePath = getSystemProperty(getString("keycodePropPath"));
+//        if(!filePath.isEmpty()) {
+//            filePath = filePath + "/cw_keycode.properties";
+//            Log.d(TAG, "getKeyCodesFromProperties: "+filePath);
+//            try {
+//                Properties properties = new Properties();
+//                properties.load(new FileInputStream(filePath));
+//                for (String key : properties.stringPropertyNames()) {
+//                    String value = properties.getProperty(key);
+//                    keycodeMap.put(key, value);
+//                }
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        }
     }
 
 
@@ -43,16 +100,16 @@ public class CloudwalkerApplication extends Application {
         return mFirebaseAnalytics;
     }
 
-    public TvInfo getTvInfo(){
+    public TvInfo getTvInfo() throws Exception {
         if(tvInfo == null){
-            prepareTvInfo(true);
+            prepareTvInfo(getBool("isCVTE"));
         }
         return tvInfo;
     }
 
 
 
-    private void prepareTvInfo(boolean isCVTE){
+    private void prepareTvInfo(boolean isCVTE) throws Exception {
         tvInfo = new TvInfo();
         tvInfo.setWmac("");
         tvInfo.setEmac("");
@@ -63,10 +120,12 @@ public class CloudwalkerApplication extends Application {
         tvInfo.setBoard("");
         tvInfo.setBrand("");
 
+
         tvInfo.setEmac(getEthMacAddress());
         tvInfo.setWmac(getWifiMacAddress(this));
         tvInfo.setModel(getSystemProperty("ro.product.model"));
         tvInfo.setCota(getSystemProperty("ro.cloudwalker.cota.version"));
+        tvInfo.setBrand(getString("brand"));
 
         if(isCVTE){
             tvInfo.setPanel(getSystemProperty("ro.cvte.panelname"));
@@ -152,23 +211,23 @@ public class CloudwalkerApplication extends Application {
         super.onTerminate();
     }
 
-    public Drawable getDrawable(String resourceName) {
+    public Drawable getDrawable(String resourceName) throws Exception {
         return getAppResources().getDrawable(getAppResources().getIdentifier(resourceName, "drawable", "tv.cloudwalker.skin"));
     }
 
-    public String getString(String resourceName) {
+    public String getString(String resourceName) throws Exception {
         return getAppResources().getString(getAppResources().getIdentifier(resourceName, "string", "tv.cloudwalker.skin"));
     }
 
-    public int getColor(String resourceName) {
+    public int getColor(String resourceName) throws Exception {
         return getAppResources().getColor(getAppResources().getIdentifier(resourceName, "color", "tv.cloudwalker.skin"));
     }
 
-    public int getInteger(String resourceName) {
+    public int getInteger(String resourceName) throws Exception {
         return getAppResources().getInteger(getAppResources().getIdentifier(resourceName, "integer", "tv.cloudwalker.skin"));
     }
 
-    public boolean getBool(String resourceName) {
+    public boolean getBool(String resourceName) throws Exception {
         return getAppResources().getBoolean(getAppResources().getIdentifier(resourceName, "bool", "tv.cloudwalker.skin"));
     }
 

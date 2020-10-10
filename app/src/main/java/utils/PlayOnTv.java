@@ -43,7 +43,8 @@ public class PlayOnTv {
             "tv.gemplex.firetv",
             "com.watcho",
             "com.flickstree.tv",
-            "com.suntv.sunnxt"};
+            "com.suntv.sunnxt",
+            "com.viacom18.tv.voot"};
 
 
     public PlayOnTv(Context context){
@@ -86,20 +87,20 @@ public class PlayOnTv {
                     deeplink = "https://www.youtube.com/playlist?list="+deeplink;
                 } else if (deeplink.startsWith("UC")) {
                     deeplink = "https://www.youtube.com/channel/"+deeplink;
-                } else {
+                } else if(!deeplink.isEmpty()) {
                     deeplink = "https://www.youtube.com/watch?v="+deeplink;
                 }
             }
         } else if (packageName.contains("graymatrix")) {
             packageName = "com.zee5.aosp";
-        } else if (packageName.contains("amazon")) {
+        } else if (packageName.contains("amazon") && !deeplink.isEmpty()) {
             deeplink = deeplink.replaceFirst("https://www", "intent://app");
             String[] result = deeplink.split("\\?");
             if (result.length > 1) {
                 deeplink = deeplink.replaceAll(result[1], "");
             }
             deeplink = deeplink + "&time=500";
-        } else if (packageName.contains("hotstar")) {
+        } else if (packageName.contains("hotstar") && !deeplink.isEmpty()) {
             if(!packageName.equals("in.startv.hotstartvonly")){
                 packageName = "in.startv.hotstartvonly";
             }
@@ -109,7 +110,7 @@ public class PlayOnTv {
             packageName = "com.jio.media.stb.ondemand";
         }else if(packageName.equals("com.tru")){
             packageName = "com.yupptv.cloudwalker";
-        }else if(packageName.equals("com.sonyliv")){
+        }else if(packageName.equals("com.sonyliv") && !deeplink.isEmpty()){
             deeplink = deeplink.replace( "https://www.sonyliv.com/details/full movie", "sony://player");
             String[] tmp = deeplink.split("/");
             deeplink = deeplink.replace(tmp[tmp.length - 1], "");
@@ -135,8 +136,7 @@ public class PlayOnTv {
         }
 
         try{
-            if(!packageName.contains("youtube"))
-                playIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            playIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(playIntent);
             return "Playing...";
         }catch (Exception e){

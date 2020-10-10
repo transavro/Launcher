@@ -62,11 +62,15 @@ public class DetailFragment extends DetailsSupportFragment {
         assert bundle != null;
         movieTile = bundle.getParcelable(MovieTile.class.getSimpleName());
         if (movieTile != null) {
-            loadRows();
+            try {
+                loadRows();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    private void loadRows() {
+    private void loadRows() throws Exception {
         setUpAdapter();
         setUpDetailsOverviewRow();
     }
@@ -90,7 +94,7 @@ public class DetailFragment extends DetailsSupportFragment {
         mGlideDrawableSimpleTarget = null;
     }
 
-    private void setUpAdapter() {
+    private void setUpAdapter() throws Exception {
         FullWidthDetailsOverviewRowPresenter mFullWidthMovieDetailsPresenter = new FullWidthDetailsOverviewRowPresenter(new MovieDetailsDescriptionPresenter(), new DetailsOverviewLogoPresenter());
         mFullWidthMovieDetailsPresenter.setActionsBackgroundColor(((CloudwalkerApplication) Objects.requireNonNull(getActivity()).getApplication()).getColor("detail_action_bg"));
         mFullWidthMovieDetailsPresenter.setBackgroundColor(((CloudwalkerApplication)getActivity().getApplication()).getColor("detail_bg"));

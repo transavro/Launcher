@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="tileLandScapeWidth">357</integer>
+    <integer name="tileLandScapeHeight">201</integer>
+    <integer name="defaulttileWidth">346</integer>
+    <integer name="deafulttileHeight">194</integer>
+    <integer name="tilePotraitWidth">236</integer>
+    <integer name="tilePotraitHeight">314</integer>
+    <integer name="tileSquareWidth">175</integer>
+    <integer name="tileSquareHeight">175</integer>
+
+<!--    HEADERS_ENABLED = 1; HEADERS_HIDDEN = 2; HEADERS_DISABLED = 3;-->
+    <integer name="has_fastlane">3</integer>
+
+
+
+<!--    ZOOM_FACTOR_NONE = 0; ZOOM_FACTOR_SMALL = 1; ZOOM_FACTOR_MEDIUM = 2; ZOOM_FACTOR_LARGE = 3; ZOOM_FACTOR_XSMALL = 4;-->
+    <integer name="zoom_factor">0</integer>
+</resources>
+
+
+
+<!--    /** The headers fragment is enabled and shown by default. */-->
+<!--    public static final int HEADERS_ENABLED = 1;-->
+
+<!--    /** The headers fragment is enabled and hidden by default. */-->
+<!--    public static final int HEADERS_HIDDEN = 2;-->
+
+<!--    /** The headers fragment is disabled and will never be shown. */-->
+<!--    public static final int HEADERS_DISABLED = 3;-->

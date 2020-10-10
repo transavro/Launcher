@@ -22,7 +22,7 @@ public class CloudwalkerAppGlideModule extends AppGlideModule {
 
     @Override
     public void registerComponents(@NonNull Context context, @NonNull Glide glide, @NonNull Registry registry) {
-        super.registerComponents(context, glide, registry);
         glide.setMemoryCategory(MemoryCategory.LOW);
+        super.registerComponents(context, glide, registry);
     }
 }
